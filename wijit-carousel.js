@@ -56,6 +56,7 @@ export class WijitCarousel extends HTMLElement {
 			}
 
 			#container {
+				padding: inherit;
 				position: relative;
 				perspective: 1000px;
 				width: 100%;
@@ -70,13 +71,13 @@ export class WijitCarousel extends HTMLElement {
 				scroll-snap-type: x mandatory;
 				transform-style: preserve-3d;
 				transition: all .5s;
-				width: 99.8%;
+				width: 99%;
 				white-space: nowrap;
 			}
 
-			#panels::-webkit-scrollbar {
+			/*#panels::-webkit-scrollbar {
 				display: none;
-			}
+			}*/
 
 			#front {
 				transform: rotateY(0deg);
@@ -97,6 +98,7 @@ export class WijitCarousel extends HTMLElement {
 			}
 
 			#controls {
+				margin-top: 1rem;
 				text-align: center;
 			}
 
@@ -203,7 +205,9 @@ export class WijitCarousel extends HTMLElement {
 		smooth = true ? 'smooth' : 'instant';
 		const options = {behavior:smooth, block:'nearest', inline:'nearest'};
 		const target = evt.target.getAttribute('data-target');
-		const panels = this.shadow.querySelector('#panels')
+		const panels = this.shadow.querySelector('#panels');
+
+		panels.style.overflow = 'hidden';
 		this.panels[target].scrollIntoView(options);
 
 		this.controls.forEach ( (control, idx) => {
@@ -284,16 +288,16 @@ export class WijitCarousel extends HTMLElement {
 
 	flipTemplate() {
 		const template = `
-			<div id="container">
-				<div id="panels" part="panels">
-					<div id="front">
-						<slot name="front"></slot>
-					</div>
-					<div id="back">
-						<slot name="back"></slot>
-					</div>
+		<div id="container">
+			<div id="panels" part="panels">
+				<div id="front">
+					<slot name="front"></slot>
+				</div>
+				<div id="back">
+					<slot name="back"></slot>
 				</div>
 			</div>
+		</div>
 		`;
 
 		const frag = document.createRange().createContextualFragment(template);
@@ -322,8 +326,13 @@ export class WijitCarousel extends HTMLElement {
 
 	get auto () { return this.#auto; }
 	set auto (value) {
-		this.#auto = value;
-		if (!!value && this.panels.length > 0) {
+		if (value == 'true') {
+			this.#auto = true;
+		} else {
+			this.#auto = false;
+		}
+
+		if (this.#auto && this.panels.length > 0) {
 			this.autoPlay(value);
 		}
 	}

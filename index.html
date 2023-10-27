@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Carousel Web Component</title>
+  <script defer type="module" src="wijit-carousel.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <p>
+    <details>
+      <summary><h1>Carousel Web Component</h1></summary>
+      <p>
+        Renders a carousel style widget.
+      </p>
+      <div>
+        <h3>Attributes</h3>
+        <ul>
+          <li><b>effect</b> optional (default: fade) The transition effect. Options are "fade", "slide" and "flip".</li>
+          <li><b>auto</b> optional (default: false) Add this attribute to auto-play a slide show</li>
+          <li><b>repeat</b> optional (default: 0) How many times to auto-repeat the slide show. Has no effect if "auto" attribute is not set. "0" means infinite repeat.</li>
+          <li><b>delay</b> optional (default: 4) How many seconds to show each panel. Has no effect if "auto" attribute is not set.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3>Usage</h3>
+          <code><pre>
+            &lt;script type="module" src="wijit-carousel.js"&gt;&lt;/script&gt;
+            &lt;wijit-carousel&gt;
+              &lt;div&gt;Foo&lt;/div&gt;
+              &lt;div&gt;Bar&lt;/div&gt;
+              &lt;div&gt;Baz&lt;/div&gt;
+              &lt;button slot="controls"&gt;Foo&lt;/button&gt;
+              &lt;button slot="controls"&gt;Bar&lt;/button&gt;
+              &lt;button slot="controls"&gt;Baz&lt;/button&gt;
+            &lt;/wijit-carousel&gt;
+          </pre></code>
+      </div>
+    </details>
+  </p>
+
+<!--   <fieldset>
+    <legend>Available Attributes</legend>
+    <label>
+      effect<br>
+      <select onchange="change(event, 'effect')">
+        <option value="fade">Default (fade)</option>
+        <option>slide</option>
+        <option>flip</option>
+      </select>
+    </label>
+
+    <label>
+      auto<br>
+      <select onchange="change(event, 'auto')">
+        <option value="false">Default (false)</option>
+        <option>true</option>
+      </select>
+    </label>
+  </fieldset> -->
+
+
+<!---------- Component ------------>
+  <div class="container">
+    <wijit-carousel auto="true">
+        <img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
+        <img src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
+        <img src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
+        <img src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
+      <input type="radio" name="imgcontrols" slot="controls">
+      <input type="radio" name="imgcontrols" slot="controls">
+      <input type="radio" name="imgcontrols" slot="controls">
+      <input type="radio" name="imgcontrols" slot="controls">
+    </wijit-carousel>
+  </div>
+
+  <div class="container">
+    <wijit-carousel style="width:400px" effect="flip">
+    <aside>
+      <h1>Log In</h1>
+      <form onclick="popup(event, '<h3>Nothing was submitted</h3>')">
+        <p>
+          <label>
+            Username<br>
+            <input autocomplete="username">
+          </label>
+        </p>
+        <p>
+          <label>
+            Password<br>
+            <input type="password" autocomplete="current-password">
+          </label>
+        </p>
+
+        <button type="submit">Log In</button>
+      </form>
+    </aside>
+
+    <aside>
+      <h1>Register</h1>
+      <form onclick="popup(event, '<h3>Nothing was submitted</h3>')">
+        <p>
+            <input placeholder="First Name" autocomplete="given-name">
+        </p>
+        <p>
+            <input placeholder="Last Name" autocomplete="given-name">
+        </p>
+        <p>
+            <input placeholder="User Name" autocomplete="username">
+        </p>
+        <p>
+            <input type="password" placeholder="Password" autocomplete="current-password">
+          </label>
+        </p>
+
+        <button type="submit">Register</button>
+      </form>
+    </aside>
+
+    <aside>
+      <h1>Forgot Password</h1>
+      <form onclick="popup(event, '<h3>Nothing was submitted</h3>')">
+        <p>
+          <label>
+            <input type="email" autocomplete="email" placeholder="Your Email">
+          </label>
+        </p>
+
+        <button type="submit">Send Password Reset Link!</button>
+      </form>
+    </aside>
+
+    <button slot="controls">Log In</button>
+    <button slot="controls">Register</button>
+    <button slot="controls">Forgot Passpwrd</button>
+  </wijit-carousel>
+</div>
+<!------------ /Component ------------>
+
+<!--------- extra ---------->
+  <dialog>
+    <p>Hello World!</p>
+    <form method="dialog">
+      <button>OK</button>
+    </form>
+  </dialog>
+
+  <script>
+    function change(evt, attr) {
+      const el = document.querySelector('wijit-appbar');
+      el.setAttribute(attr, evt.target.value);
+    }
+
+    function popup(evt, msg) {
+      evt.preventDefault();
+      const dialog = document.querySelector('dialog');
+      const p = dialog.querySelector('p');
+      p.innerHTML = msg;
+      dialog.showModal();
+    }
+  </script>
+
+</body>
+</html>

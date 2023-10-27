@@ -2,6 +2,8 @@
 
 Renders a carousel style widget.
 
+Demo: https://holmesbryant.github.io/wijit-carousel/
+
 ### Attributes
 
 -   **effect** optional (default: fade) The transition effect. Options are "fade", "slide" and "flip".

@@ -43,34 +43,66 @@
     </details>
   </p>
 
-<!--   <fieldset>
-    <legend>Available Attributes</legend>
-    <label>
-      effect<br>
-      <select onchange="change(event, 'effect')">
-        <option value="fade">Default (fade)</option>
-        <option>slide</option>
-        <option>flip</option>
-      </select>
-    </label>
+  <div id="docs">
+    <!-- <fieldset>
+      <legend>Available Attributes</legend>
+      <label>
+        effect<br>
+        <select onchange="change(event, 'effect')">
+          <option value="fade">Default (fade)</option>
+          <option>slide</option>
+          <option>flip</option>
+        </select>
+      </label>
 
-    <label>
-      auto<br>
-      <select onchange="change(event, 'auto')">
-        <option value="false">Default (false)</option>
-        <option>true</option>
-      </select>
-    </label>
-  </fieldset> -->
+      <label>
+        speed<br>
+        <input type="number" oninput="change(event, 'speed')">
+      </label>
+
+      <label>
+        activeclass<br>
+        <select onchange="change(event, 'activeclass')">
+          <option value="active">Default (active)</option>
+          <option>active2</option>
+          <option>active3</option>
+        </select>
+      </label>
+
+      <fieldset>
+        <legend>Autoplay Options</legend>
+      <label>
+        auto<br>
+        <select onchange="change(event, 'auto')">
+          <option value="false">Default (false)</option>
+          <option>true</option>
+        </select>
+      </label>
+
+      <label>
+        repeat<br>
+        <input type="number" oninput="change(event, 'repeat')">
+      </label>
+
+      <label>
+        delay<br>
+        <input type="number" oninput="change(event, 'delay')">
+      </label>
+    </fieldset>
+
+    </fieldset> -->
+  </div>
 
 
 <!---------- Component ------------>
   <div class="container">
-    <wijit-carousel auto="true">
-        <img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
-        <img src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
-        <img src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
-        <img src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
+    <p>Images courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA</a></p>
+
+    <wijit-carousel auto="true" effect="slide" id="space-pics">
+        <img id="i0" alt="IMAGE 0" src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
+        <img id="i1" alt="IMAGE 1" src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
+        <img id="i2" alt="IMAGE 2" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
+        <img id="i3" alt="IMAGE 3" src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
       <input type="radio" name="imgcontrols" slot="controls">
       <input type="radio" name="imgcontrols" slot="controls">
       <input type="radio" name="imgcontrols" slot="controls">
@@ -78,68 +110,170 @@
     </wijit-carousel>
   </div>
 
-  <div class="container">
-    <wijit-carousel style="width:400px" effect="flip">
-    <aside>
-      <h1>Log In</h1>
-      <form onclick="popup(event, '<h3>Nothing was submitted</h3>')">
-        <p>
-          <label>
-            Username<br>
-            <input autocomplete="username">
-          </label>
-        </p>
-        <p>
-          <label>
-            Password<br>
-            <input type="password" autocomplete="current-password">
-          </label>
-        </p>
 
-        <button type="submit">Log In</button>
-      </form>
-    </aside>
+ <!--  <div class="container">
+    <wijit-carousel effect="flip" id="forms">
+      <fieldset>
+        <legend>Log In</legend>
+        <form onsubmit="popup(event, '<h3>Nothing was submitted</h3>')">
+          <p>
+            <label>
+              Username<br>
+              <input autocomplete="username">
+            </label>
+          </p>
+          <p>
+            <label>
+              Password<br>
+              <input type="password" autocomplete="current-password">
+            </label>
+          </p>
 
-    <aside>
-      <h1>Register</h1>
-      <form onclick="popup(event, '<h3>Nothing was submitted</h3>')">
-        <p>
-            <input placeholder="First Name" autocomplete="given-name">
-        </p>
-        <p>
-            <input placeholder="Last Name" autocomplete="given-name">
-        </p>
-        <p>
-            <input placeholder="User Name" autocomplete="username">
-        </p>
-        <p>
-            <input type="password" placeholder="Password" autocomplete="current-password">
-          </label>
-        </p>
+          <button type="submit">Log In</button>
+        </form>
+      </fieldset>
 
-        <button type="submit">Register</button>
-      </form>
-    </aside>
+      <fieldset>
+        <legend>Register</legend>
+        <form onsubmit="popup(event, '<h3>Nothing was submitted</h3>')">
+          <p>
+              <input placeholder="First Name" autocomplete="given-name">
+          </p>
+          <p>
+              <input placeholder="Last Name" autocomplete="given-name">
+          </p>
+          <p>
+              <input placeholder="User Name" autocomplete="username">
+          </p>
+          <p>
+              <input type="password" placeholder="Password" autocomplete="current-password">
+            </label>
+          </p>
 
-    <aside>
-      <h1>Forgot Password</h1>
-      <form onclick="popup(event, '<h3>Nothing was submitted</h3>')">
-        <p>
-          <label>
-            <input type="email" autocomplete="email" placeholder="Your Email">
-          </label>
-        </p>
+          <button type="submit">Register</button>
+        </form>
+      </fieldset>
 
-        <button type="submit">Send Password Reset Link!</button>
-      </form>
-    </aside>
+      <fieldset>
+        <legend>Forgot Password</legend>
+        <form onsubmit="popup(event, '<h3>Nothing was submitted</h3>')">
+          <p>
+            <label>
+              <input type="email" autocomplete="email" placeholder="Your Email">
+            </label>
+          </p>
 
-    <button slot="controls">Log In</button>
-    <button slot="controls">Register</button>
-    <button slot="controls">Forgot Passpwrd</button>
-  </wijit-carousel>
-</div>
+          <button type="submit">Send Password Reset Link!</button>
+        </form>
+      </fieldset>
+
+      <button slot="controls">Log In</button>
+      <button slot="controls">Register</button>
+      <button slot="controls">Forgot Passpwrd</button>
+    </wijit-carousel>
+  </div> -->
 <!------------ /Component ------------>
+
+<!-- <style>
+  .panel {
+    height: 200px;
+    width: 100%;
+    max-width: 1024px;
+    overflow: hidden;
+    --direction: forwards;
+    --pause: 2;
+    --elements: 4;
+    --duration: calc(1s * var(--pause) * var(--elements));
+  }
+
+  .panel[data-animated="true"] {
+    overflow: hidden;
+  }
+
+  .panel[data-direction="right"] {
+    --direction: reverse;
+  }
+
+  .slider {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .panel[data-animated="true"] .slider {
+    animation-name: scroll;
+    animation-duration: var(--duration);
+    animation-timing-function: ease-in-out;
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: forward;
+    animation-fill-mode: none;
+    animation-play-state: running;
+
+    flex-wrap: nowrap;
+    width: fit-content;
+  }
+
+  .slider > img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+
+  @keyframes scroll {
+    0%, 20% { transform: translate(0); }
+    25%, 45% { transform: translate(-12.5%); }
+    50%, 70% { transform: translate(-25%); }
+    75%, 95% { transform: translate(-37.5%); }
+    100% { transform: translate(-50%); }
+  }
+</style> -->
+
+
+<!-- <div class="wijit">
+  <div class="panel" data-count="4" data-pause="1">
+
+    <div class="slider">
+      <img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
+      <img src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
+      <img src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
+      <img src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
+    </div>
+
+  </div>
+</div> -->
+
+
+
+<script>
+  const scrollers = document.querySelectorAll('.panel');
+  if (!window.matchMedia("(prefers-reduced-motion:reduce)").matches) {
+    addAnimation();
+  }
+
+  function addAnimation() {
+    scrollers.forEach (scroller => {
+      scroller.setAttribute('data-animated', 'true');
+
+      const scrollerInner = scroller.querySelector('.slider');
+      const scrollerContent = Array.from(scrollerInner.children);
+
+      scrollerContent.forEach ((item, idx) => {
+        const dupe = item.cloneNode(true);
+        dupe.setAttribute('aria-hidden', true);
+        scrollerInner.append(dupe);
+      });
+    });
+  }
+
+  function pause(evt) {
+    const container = evt.target.closest('.scroller-container');
+    const scroller = container.querySelector('.slider');
+    const computed = window.getComputedStyle(scroller);
+    const state = computed.getPropertyValue('animation-play-state');
+    const newState = (state ==='running') ? 'paused' : 'running';
+    scroller.style.animationPlayState = newState;
+  }
+</script>
 
 <!--------- extra ---------->
   <dialog>
@@ -150,8 +284,9 @@
   </dialog>
 
   <script>
+
     function change(evt, attr) {
-      const el = document.querySelector('wijit-appbar');
+      const el = document.querySelector('wijit-carousel');
       el.setAttribute(attr, evt.target.value);
     }
 

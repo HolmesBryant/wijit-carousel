@@ -1,62 +1,65 @@
+/**** Important! ****/
+  *, ::before, ::after
+  { box-sizing: border-box; }
+
 /******** WijitBar ********/
-  wijit-carousel {
-    display: block;
-/*    border: 1px dotted silver;*/
-    overflow: hidden;
-    padding: 10px;
-    width: 100%;
+  wijit-carousel#space-pics {
+    width: 90%;
+    height: 300px;
+  }
+
+  /**** For images having different heights, normalize them all ****/
+  wijit-carousel#space-pics > img {
+    object-fit: cover;
+/*    object-position: 0 -300px;*/
+    margin: 0;
+  }
+
+  wijit-carousel#forms {
+    width: 400px;
   }
 
 /**** Each panel is wrapped in <aside> tag if not already present ****/
   wijit-carousel aside
   {
-    border: 1px dotted var(--bordercolor);
-    height: 100%;
-    margin-bottom: 1rem;
-    position: relative;
-    text-align: center;
-
+/*    border: 1px dotted var(--bordercolor);*/
+/*    height: 100%;*/
+/*    margin-bottom: 1rem;*/
+/*    position: relative;*/
+/*    text-align: center;*/
   }
 
   /**** button controls under second example ****/
   wijit-carousel > button
-  { border-radius: 0; }
-
-  wijit-carousel > button:first-of-type
-  { border-radius: 10px 0 0 10px; }
-
-  wijit-carousel > button:last-of-type
-  { border-radius: 0 10px 10px 0; }
-
-  wijit-carousel > .active
-  { background-color: lightyellow; }
-
-  /**** For images having different heights, write css to normalize them all ****/
-  wijit-carousel aside > img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
+  {
+/*    border-radius: 0; */
   }
 
-  wijit-carousel::part(panels) {
-    scrollbar-width: 4px;
-    height: 350px;
+  wijit-carousel > button:first-of-type
+  {
+/*    border-radius: 10px 0 0 10px; */
+  }
+
+  wijit-carousel > button:last-of-type
+  {
+/*    border-radius: 0 10px 10px 0; */
+  }
+
+
+  /**** Set the height for the container holding the panels (or slides) in the carousel ****/
+  wijit-carousel::part(panel) {
     /* Setting "overflow" to any value breaks the flip effect */
     /* Setting a height smaller than the tallest element breaks the flip effect */
 
   }
 
-  wijit-carousel::part(panels)::-webkit-scrollbar {
-        display: none;
-      }
-
-
-  #panels::-webkit-scrollbar {
-      }
+ /* wijit-carousel#forms {
+    width:400px
+  }*/
 
 /******** General ********/
-
   html {
+    font-size: 16px;
     height: 100%;
     width: 100%;
     --bordercolor: rgb(150,150,150);
@@ -66,7 +69,7 @@
   {
     background: rgb(245,245,245);
     font-family: sans-serif;
-    font-size: 16px;
+    margin: 10px;
   }
 
   button
@@ -91,14 +94,6 @@
     box-shadow: none;
   }
 
-  summary:hover {
-    box-shadow: 2px 2px 5px var(--bordercolor);
-  }
-
-  summary:active {
-    box-shadow: none;
-  }
-
   details > *
   {
     background: white;
@@ -111,6 +106,9 @@
   {
     border: 1px solid silver;
     border-radius: 10px;
+  }
+
+  #docs fieldset {
     margin-bottom: 1rem;
   }
 
@@ -129,6 +127,12 @@
     padding: 5px;
   }
 
+  input[type=radio] {
+    aspect-ratio: 1/1;
+    cursor: pointer;
+    height: 35px;
+  }
+
   label
   {
     display: inline-block;
@@ -141,18 +145,26 @@
   summary
   { cursor: pointer; }
 
+  summary:hover {
+    box-shadow: 2px 2px 5px var(--bordercolor);
+  }
+
+  summary:active {
+    box-shadow: none;
+  }
+
+
   .container
   {
     align-items: center;
     background: white;
     border: 1px solid var(--bordercolor);
     border-radius: 20px;
-    box-sizing: border-box;
     display:flex;
+    flex-direction: column;
     justify-content: center;
     margin-bottom: 1rem;
-    min-width: min-content;
-    padding: 1rem;
+    padding: 10px;
   }
 
 /******** Menu Button ********/

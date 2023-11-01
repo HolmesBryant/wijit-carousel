@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+
+	<!-- <style>
+		.wijit {
+			display: block;
+			height: 300px;
+			scroll-behavior: smooth;
+			width: 800px;
+		}
+
+		img {
+			display: inline-block;
+			scroll-snap-type: x mandatory;
+			scroll-snap-align: start;
+			scroll-snap-stop: always;
+			height: 100%;
+			width: 99.5%;
+
+		}
+
+		.container {
+			align-items: center;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			perspective: 1000px;
+			position: relative;
+		}
+
+		.panel {
+			/* Setting overflow breaks flip effect */
+			height: 100%;
+			position: relative;
+			transition: all 1s;
+			transform-style: preserve-3d;
+			width: 100%;
+		}
+
+		.slider {
+			height: 100%;
+			white-space: nowrap;
+		}
+
+		.front,
+		.back {
+			height: 100%;
+			overflow: hidden;
+			position: absolute;
+			backface-visibility: hidden;
+			width: 100%;
+		}
+
+		.front {
+			transform: rotateY(0deg);
+		}
+
+		.back {
+			transform: rotateY(180deg);
+		}
+
+		.hidden { display: none; }
+
+		/* Touch devices */
+		@media (hover: none) {
+			.scroller { overflow-x: auto; }
+		}
+	</style> -->
+
+	<style>
+		.wijit {
+			border: 1px solid gray;
+			display: block;
+			height: 300px;
+			scroll-behavior: smooth;
+			width: 800px;
+	    --direction: forwards;
+	    --pause: 2;
+	    --elements: 4;
+	    --duration: calc(1s * var(--pause) * var(--elements));
+		}
+
+		.container {
+			align-items: center;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			perspective: 1000px;
+			position: relative;
+		}
+
+	  .panel {
+	    height: 100%;
+	    width: 100%;
+	    overflow: hidden;
+
+	    /* Eliminates margins on inline-block children*/
+	    font-size: 0;
+		}
+
+	  .slider {
+	    animation-name: scroll;
+	    animation-duration: var(--duration);
+	    animation-timing-function: ease-in-out;
+	    animation-delay: 0s;
+	    animation-iteration-count: infinite;
+	    animation-direction: forward;
+	    animation-fill-mode: none;
+	    animation-play-state: running;
+			height: 100%;
+			white-space: nowrap;
+	  }
+
+	  .slider > * {
+	    display: inline-block;
+	    font-size: reset;
+	    height: 100%;
+	    margin: 0;
+	    object-fit: cover;
+	    padding: 0;
+		scroll-snap-type: x mandatory;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+		vertical-align: top;
+		width: 100%;
+	  }
+
+
+	  @keyframes scroll {
+	    0%, 20% { transform: translate(0); }
+	    25%, 45% { transform: translate(-100%); }
+	    50%, 70% { transform: translate(-200%); }
+	    75%, 95% { transform: translate(-300%); }
+	    100% { transform: translate(-400%); }
+	  }
+	</style>
+</head>
+<body>
+	<div class="wijit">
+
+		<div class="container">
+			<div class="panel" part="panel">
+
+				<div class="slider">
+					<img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
+			        <img src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
+			        <img src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
+			        <img src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
+
+			        <img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
+				</div><!-- /slider -->
+
+				<div class="front" class="hidden">
+					<slot name="front"></slot>
+				</div>
+				<div class="back" class="hidden">
+					<slot name="back"></slot>
+				</div>
+
+			</div><!-- /panel -->
+			<div class="controls" part="controls">
+		      <input type="radio" name="imgcontrols">
+		      <input type="radio" name="imgcontrols">
+		      <input type="radio" name="imgcontrols">
+		      <input type="radio" name="imgcontrols">
+			</div><!-- /controls -->
+		</div><!-- /container -->
+
+	</div><!-- /wijit -->
+
+</body>
+</html>

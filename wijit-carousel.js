@@ -5,7 +5,7 @@
  *	The first control affects the first panel, ect.
  *	The panels can also be swiped on touch devices.
  *
- *	@attribute  "auto":Number  	Optional    Autoplay slideshow. The value is the delay between transitions, in seconds.
+ *	@attribute  "auto":Number  	Optional    Autoplay slideshow. The value is the pause between transitions, in seconds.
  *	@attribute: "repeat":Number	Optional	Number of cycles to repeat the slide show. Enter "0" (default) for infinite repetition.
  *
  *	@example:
@@ -22,62 +22,101 @@
  *
  */
 export class WijitCarousel extends HTMLElement {
-	#auto = false;
-	#repeat = 0;
-	#delay = 4;
 	#effect = 'fade';
-	panelheight = '400px';
-	activeClass = 'active';
+	#auto = false;
+	#repeat = 2;
+	#pause = 3;
+	#speed = 4;
+	#activeclass = 'active';
 	shadow = ShadowRoot;
-	panels = [];
-	controls = [];
-	container = HTMLElement;
-	rotations = 0;
+	offset = 0;
+	panel;
+	slider;
+	slides;
+	controls;
+	next;
 	effects = ['slide', 'fade', 'flip'];
-	static observedAttributes = ['auto', 'repeat'];
+	static observedAttributes = ['effect', 'auto', 'repeat', 'pause', 'speed', 'activeclass'];
 
 	constructor() {
 		super();
 		this.shadow = this.attachShadow({mode: 'open'});
 		this.shadow.innerHTML = `
-			<style>
+		<style>
 			:host {
 				display: block;
 				scroll-behavior: smooth;
+				width: 100%;
+		    --direction: forwards;
+		    --pause: 2;
+	  	  --elements: 4;
 			}
 
-			::slotted(aside) {
+			::slotted(:not([slot])) {
 				display: inline-block;
-				overflow-y: hidden;
+		    font-size: reset;
+		    height: 100%;
+		    margin: 0;
+		    object-fit: cover;
+		    padding: 0;
 				scroll-snap-type: x mandatory;
 				scroll-snap-align: start;
 				scroll-snap-stop: always;
+				vertical-align: top;
 				width: 100%;
 			}
 
 			#container {
-				padding: inherit;
-				position: relative;
-				perspective: 1000px;
-				width: 100%;
+				align-items: center;
+				display: flex;
+				flex-direction: column;
 				height: 100%;
+				perspective: 1000px;
+				position: relative;
 			}
 
-			#panels {
-				height: ${this.panelheight};
-				opacity: 1.0;
+			#panel {
+				/* Setting overflow breaks flip effect */
+				height: 100%;
+				overflow: hidden;
 				position: relative;
-				scrollbar-width: none;
-				scroll-snap-type: x mandatory;
+				transition: all 1s;
 				transform-style: preserve-3d;
-				transition: all .5s;
-				width: 99%;
+				width: 100%;
+
+		    /* Eliminates margins on inline-block children*/
+		    font-size: 0;
+			}
+
+			#slider {
+				height: 100%;
+				white-space: nowrap;
+
+	    	animation-timing-function: ease-in-out;
+	    	animation-delay: 0s;
+	    	animation-iteration-count: infinite;
+	    	animation-direction: forward;
+	    	animation-fill-mode: none;
+	    	animation-play-state: running;
+				height: 100%;
 				white-space: nowrap;
 			}
 
-			/*#panels::-webkit-scrollbar {
-				display: none;
-			}*/
+			#slider.autoslide {
+				animation-name: scroll;
+				/*
+				animation-duration: calc(1s * var(--pause) * var(--elements));
+				*/
+			}
+
+			#front,
+			#back {
+				height: 100%;
+				overflow: hidden;
+				position: absolute;
+				backface-visibility: hidden;
+				width: 100%;
+			}
 
 			#front {
 				transform: rotateY(0deg);
@@ -87,31 +126,32 @@ export class WijitCarousel extends HTMLElement {
 				transform: rotateY(180deg);
 			}
 
-			#front,
-			#back
-			{
-				width: 100%;
-				height: 100%;
-				position: absolute;
-				backface-visibility: hidden;
-
-			}
-
-			#controls {
-				margin-top: 1rem;
-				text-align: center;
-			}
-
+			.hidden { display: none; }
 
 			/* Touch devices */
 			@media (hover: none) {
 				.scroller { overflow-x: auto; }
 			}
+		</style>
 
-			</style>
-			<div id="controls">
+		<div id="container">
+			<div id="panel" part="panel">
+				<div id="slider">
+					<slot></slot>
+				</div>
+
+				<div id="front" class="hidden">
+					<slot name="front"></slot>
+				</div>
+				<div id="back" class="hidden">
+					<slot name="back"></slot>
+				</div>
+			</div>
+
+			<div id="controls" part="controls">
 				<slot name="controls"></slot>
 			</div>
+		</div>
 		`;
 	}
 
@@ -120,77 +160,145 @@ export class WijitCarousel extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.effect = this.getAttribute('effect') || this.effect;
-		const controls = this.shadow.querySelector('#controls');
-		this.wrapPanels();
-
-		if (this.effect === 'flip') {
-			this.shadow.insertBefore(this.flipTemplate(), controls);
-		} else {
-			this.shadow.insertBefore(this.scrollTemplate(), controls);
-		}
-
+		this.panel = this.shadow.querySelector('#panel');
+		this.slides = Array.from(this.querySelectorAll('*:not([slot=controls])'));
+		this.slider = this.shadow.getElementById("slider");
+		this.controls = this.querySelectorAll('*[slot=controls]');
 		this.initControls();
-		if (this.auto) this.autoPlay();
-	}
-
-	/**
-	 * Wrap each direct child that is not a control inside an <aside> element
-	 * and add each resulting aside to this.panels.
-	 * @return {[type]} [description]
-	 */
-	wrapPanels() {
-		const panels = [...this.children].filter (item => !item.hasAttribute('slot'));
-		const aside = document.createElement('aside');
-		const frag = document.createDocumentFragment();
-		let wrapper;
-
-		panels.forEach (panel => {
-			if (panel.localName === 'aside') {
-				wrapper = panel;
-			} else {
-				wrapper = aside.cloneNode();
-				wrapper.append(panel);
-			}
-			this.panels.push(wrapper);
-			frag.append(wrapper);
-		});
-
-		this.append(frag);
 	}
 
 	initControls() {
-		this.controls = [...this.children].filter (item => item.getAttribute('slot') === 'controls');
 		for (let i = 0; i < this.controls.length; i++) {
 			// if there are more controls than panels, ignore the extra controls.
-			if (!this.panels[i]) continue;
+			if (!this.slides[i]) continue;
 
-			this.panels[i].setAttribute('data-panel', i);
+			this.slides[i].setAttribute('data-panel', i);
 			this.controls[i].setAttribute('data-target', i);
 			this.controls[i].addEventListener('click', evt => {
 				if (evt.target.localName !== 'input') evt.preventDefault();
-				this.resetControls(evt);
+				// if the control was clicked by a human
+				if (evt.isTrusted) {
+					//Cancel autoplay mode if it is running.
+					this.auto = false;
+				}
+
 				this.transition(evt);
 			});
 		}
+
+		this.controls[0].click();
 	}
 
-	resetControls(event) {
-		for (const control of this.controls) {
+	initFlip() {
+		const dupe = this.querySelector('.dupe');
+		if (dupe) this.removeChild(dupe);
 
-			if (control !== event.target) {
-				// in case some controls are <option>
-				control.selected = false;
-				// in case some controls are form inputs
-				control.checked = false;
-			}
+		this.slides = this.slides || Array.from(this.querySelectorAll('*:not([slot=controls])'));
+		this.slider = this.slider || this.shadow.getElementById("slider");
+		this.panel = this.panel || this.shadow.querySelector('#panel');
+		this.back = this.back || this.shadow.querySelector('#back');
+		this.front = this.fron || this.shadow.querySelector('#front');
+		this.flipAbortController = new AbortController();
+
+		const current = this.current || this.slides[0];
+
+		current.setAttribute('slot', 'front');
+		this.slider.classList.add('hidden');
+		this.front.classList.remove('hidden');
+		this.back.classList.remove('hidden');
+		this.panel.classList.remove('slide');
+		this.panel.addEventListener('transitionstart', evt => {
+			this.replaceBackface();
+		}, {signal: this.flipAbortController.signal} );
+	}
+
+	initSlide() {
+		const dupe = this.querySelector('.dupe');
+		if (dupe) this.removeChild(dupe);
+
+		this.slider = this.slider || this.shadow.getElementById("slider");
+		this.slides = this.slides || Array.from(this.querySelectorAll('*:not([slot=controls])'));
+		this.panel = this.panel || this.shadow.querySelector('#panel');
+		const back = this.shadow.querySelector('#back');
+		const front = this.shadow.querySelector('#front');
+
+		if (this.flipAbortController) this.flipAbortController.abort();
+		this.panel.classList.add('slide');
+
+		this.slides.forEach (slide => {
+			slide.removeAttribute('slot');
+		});
+
+		this.slider.classList.remove('hidden');
+		front.classList.add('hidden');
+		back.classList.add('hidden');
+
+	}
+
+	initAutoSlide() {
+		// If user prefers reduced motion, don't animate.
+		if (window.matchMedia("(prefers-reduced-motion:reduce)").matches) {
+			console.warn('AutoPlay is disabled because of setting: "prefers-reduced-motion"');
+			this.initSlide();
+			return;
 		}
+
+		const style = this.shadow.querySelector('style');
+		const numKeyframes = this.slides.length;
+		const step = 100 / numKeyframes;
+		let css =`\n@keyframes scroll {\n`;
+
+		for (let i = 0; i <= numKeyframes; i++) {
+			const kstep = step * i;
+			const keya = `${kstep}%`;
+			const keyb = (kstep === 100) ? '' : `, ${kstep + 20}%`;
+			const translate = (i === 0) ? '0' : `-${100 * i}%`;
+			css += `${keya} ${keyb} { transform: translate(${translate}); }\n`;
+		}
+
+		css += `}`;
+		const textNode = document.createTextNode(css);
+		style.prepend(textNode);
+
+		const dupe = this.slides[0].cloneNode(true);
+		dupe.removeAttribute('id');
+		dupe.removeAttribute('data-panel');
+		dupe.classList.add('dupe');
+		this.append(dupe);
+
+		const duration = this.pause * numKeyframes;
+		this.slider.addEventListener('animationstart', (evt) => {
+			const delay = this.pause * 1000;
+			let counter = 1;
+			this.interval = setInterval (() => {
+				const controlIdx = counter % this.controls.length;
+				this.controls[controlIdx].click();
+				counter++;
+			}, delay);
+		});
+
+		let iteration = 1;
+		this.slider.addEventListener('animationiteration', (evt) => {
+			console.log(iteration);
+			if (iteration == this.repeat) {
+				this.slider.classList.remove('autoslide');
+				clearInterval(this.interval);
+			}
+
+			iteration++;
+		});
+
+		this.slider.classList.add('autoslide');
+		// console.log(this.pause, numKeyframes, duration)
+		this.slider.style.animationDuration = `${duration}s`;
 	}
 
 	transition(event) {
+		if (this.auto) return;
+
 		switch (this.effect) {
 		case 'slide':
-			this.scrollEffect(event);
+			this.slideEffect(event);
 			break;
 		case 'flip':
 			this.flipEffect(event);
@@ -201,36 +309,39 @@ export class WijitCarousel extends HTMLElement {
 		}
 	}
 
-	scrollEffect (evt, smooth = true) {
-		smooth = true ? 'smooth' : 'instant';
-		const options = {behavior:smooth, block:'nearest', inline:'nearest'};
+	slideEffect (evt, smooth = true) {
+		this.slider.classList.remove('autoslide');
+		if (!evt.isTrusted) return;
+
 		const target = evt.target.getAttribute('data-target');
-		const panels = this.shadow.querySelector('#panels');
+		const left = this.slides[target].offsetLeft;
+		const adjust = this.slides[0].offsetLeft;
+		const offset = left - adjust;
 
-		panels.style.overflow = 'hidden';
-		this.panels[target].scrollIntoView(options);
-
-		this.controls.forEach ( (control, idx) => {
-			const target = evt.target.getAttribute('data-target');
-			if (target == idx) {
-				control.classList.add(this.activeClass);
-			} else {
-				control.classList.remove(this.activeClass);
-			}
+		this.panel.scroll({
+			top: 0,
+			left: offset,
+			behavior: 'smooth'
 		});
 
+		this.controls.forEach ( (control, idx) => {
+			if (target == idx) {
+				control.classList.add(this.activeclass);
+			} else {
+				control.classList.remove(this.activeclass);
+			}
+		});
 	}
 
-	fadeEffect (evt, delay = 650, smooth) {
-		const delay2 = delay - 100;
-		const panels = this.shadow.querySelector('#panels');
-		panels.style.opacity = '0.0';
+	fadeEffect (evt, pause = 650, smooth) {
+		this.slider.classList.remove('autoslide');
+		this.panel.style.opacity = '0.0';
 		setTimeout ( () => {
-			this.scrollEffect(evt, smooth);
+			this.slideEffect(evt, smooth);
 			setTimeout( () => {
-				panels.style.removeProperty('opacity');
-			}, delay)
-		}, delay2);
+				this.panel.style.removeProperty('opacity');
+			}, pause)
+		}, pause);
 	}
 
 	/**
@@ -239,28 +350,30 @@ export class WijitCarousel extends HTMLElement {
 	 * @return {Void}
 	 */
 	flipEffect(event) {
-		const panelsElem = this.shadow.querySelector('#panels');
+		this.slider.classList.remove('autoslide');
 		const target = event.target.getAttribute('data-target');
-		const next = this.panels[target];
-		const currentRotation = this.getTransformValue(panelsElem.style.transform);
+		this.next = this.slides[target];
+		this.current = this.next;
+		const currentRotation = this.getTransformValue(this.panel.style.transform);
 		const rotate = currentRotation + 180;
-		this.rotations++;
+		this.panel.style.transform = `rotateY(${rotate}deg)`;
+	}
 
-		if (this.rotations % 2 === 1) {
-			next.setAttribute('slot', 'back');
-			const front = this.querySelector('*[slot=front]');
-			setTimeout ( () => {
-				front.removeAttribute('slot');
-			}, 500);
+	replaceBackface(evt) {
+		const currentRotation = this.getTransformValue(this.panel.style.transform);
+		const pause = (this.pause * 1000) / 2;
+		const frontElem = this.querySelector('*[slot=front]');
+		const backElem = this.querySelector('*[slot=back]');
+
+		if ((currentRotation/180) % 2 === 1) {
+			// Front is facing out, replace the back
+			if (backElem) backElem.removeAttribute('slot');
+			this.next.setAttribute('slot', 'back');
 		} else {
-			next.setAttribute('slot', 'front');
-			const back = this.querySelector('*[slot=back]');
-			setTimeout ( () => {
-				back.removeAttribute('slot');
-			}, 500);
+			// Back is facing out, replce the front
+			if (frontElem) frontElem.removeAttribute('slot');
+			this.next.setAttribute('slot', 'front');
 		}
-
-		panelsElem.style.transform = `rotateY(${rotate}deg)`;
 	}
 
 	getTransformValue(transformValue) {
@@ -274,67 +387,53 @@ export class WijitCarousel extends HTMLElement {
 		return ret;
 	}
 
-	scrollTemplate() {
-		const template = `
-		<div id="container">
-			<div id="panels">
-				<slot></slot>
-			</div>
-		</div>
-		`;
-
-		return document.createRange().createContextualFragment(template);
-	}
-
-	flipTemplate() {
-		const template = `
-		<div id="container">
-			<div id="panels" part="panels">
-				<div id="front">
-					<slot name="front"></slot>
-				</div>
-				<div id="back">
-					<slot name="back"></slot>
-				</div>
-			</div>
-		</div>
-		`;
-
-		const frag = document.createRange().createContextualFragment(template);
-
-		this.panels[0].setAttribute('slot', 'front');
-
-		return frag;
-	}
-
 	autoPlay () {
 		let control;
-		let counter = 1;
-		const delay = this.delay * 1000;
-		const repeat = this.panels.length * this.repeat;
+		let counter = 0;
+		const pause = this.pause * 1000;
+		const panels = [...this.querySelectorAll('*:not([slot=controls])')];
+		const repeat = panels.length * this.repeat;
 		const interval = setInterval (() => {
-			if (counter < repeat || repeat === 0) {
-				const controlIdx = counter % this.controls.length;
-				control = this.controls[controlIdx];
-				control.click();
-				counter++;
+			if (this.auto === false) {
+				clearInterval (interval);
+			} else if (counter < repeat || repeat === 0) {
+				// auto is true
+				if (this.effect !== 'slide') {
+					const controlIdx = counter % this.controls.length;
+					control = this.controls[controlIdx];
+					control.click();
+					counter++;
+				} else {
+					// effect is 'slide'
+					clearInterval (interval);
+					this.initAutoSlide();
+				}
+
 			} else {
 				clearInterval (interval);
 			}
-		}, delay)
+		}, pause)
+	}
+
+	autoSlide() {
+
+	}
+
+	get effect () { return this.#effect; }
+	set effect (value) {
+		this.#effect = value;
+		if (value === 'flip') {
+			this.initFlip();
+		} else {
+			this.initSlide();
+		}
 	}
 
 	get auto () { return this.#auto; }
 	set auto (value) {
-		if (value == 'true') {
-			this.#auto = true;
-		} else {
-			this.#auto = false;
-		}
-
-		if (this.#auto && this.panels.length > 0) {
-			this.autoPlay(value);
-		}
+		this.#auto = (value === 'true') ? true : false;
+		// if (this.#auto) this.autoPlay(value);
+		if (this.#auto) this.autoPlay(value);
 	}
 
 	get repeat () { return this.#repeat; }
@@ -342,14 +441,19 @@ export class WijitCarousel extends HTMLElement {
 		this.#repeat = value;
 	}
 
-	get delay() { return this.#delay; }
-	set delay(value) {
-		this.#delay = value;
+	get pause () { return this.#pause; }
+	set pause (value) {
+		this.#pause = value;
 	}
 
-	get effect () { return this.#effect; }
-	set effect (value) {
-		this.#effect = value;
+	get speed () { return isNaN(this.#speed) ? this.#speed : this.#speed + 's'; }
+	set speed (value) {
+		this.#speed = value + 's';
+	}
+
+	get activeclass () { return this.#activeclass; }
+	set activeclass (value) {
+		this.#activeclass = value;
 	}
 }
 

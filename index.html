@@ -7,6 +7,13 @@
   <title>Carousel Web Component</title>
   <script defer type="module" src="wijit-carousel.js"></script>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .slide { padding: 1em }
+    .red { background: darkred }
+    .orange { background: orange }
+    .yellow { background: yellow }
+    .green { background: green }
+  </style>
 </head>
 
 <body>
@@ -44,7 +51,7 @@
   </p>
 
   <div id="docs">
-    <!-- <fieldset>
+    <fieldset>
       <legend>Available Attributes</legend>
       <label>
         effect<br>
@@ -53,11 +60,6 @@
           <option>slide</option>
           <option>flip</option>
         </select>
-      </label>
-
-      <label>
-        speed<br>
-        <input type="number" oninput="change(event, 'speed')">
       </label>
 
       <label>
@@ -72,7 +74,7 @@
       <fieldset>
         <legend>Autoplay Options</legend>
       <label>
-        auto<br>
+        auto (wait for it)<br>
         <select onchange="change(event, 'auto')">
           <option value="false">Default (false)</option>
           <option>true</option>
@@ -81,24 +83,24 @@
 
       <label>
         repeat<br>
-        <input type="number" oninput="change(event, 'repeat')">
+        <input type="number" value="0" placeholder="Default: 0 (infinite)" oninput="change(event, 'repeat')">
       </label>
 
       <label>
-        delay<br>
-        <input type="number" oninput="change(event, 'delay')">
+        pause<br>
+        <input type="number" value="3" placeholder="Default: 3" oninput="change(event, 'pause')">
       </label>
     </fieldset>
 
-    </fieldset> -->
+    </fieldset>
   </div>
 
 
 <!---------- Component ------------>
-  <div class="container">
+  <!-- <div class="container">
     <p>Images courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA</a></p>
 
-    <wijit-carousel auto="true" effect="slide" id="space-pics">
+    <wijit-carousel id="space-pics">
         <img id="i0" alt="IMAGE 0" src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
         <img id="i1" alt="IMAGE 1" src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
         <img id="i2" alt="IMAGE 2" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
@@ -108,7 +110,19 @@
       <input type="radio" name="imgcontrols" slot="controls">
       <input type="radio" name="imgcontrols" slot="controls">
     </wijit-carousel>
-  </div>
+  </div> -->
+
+  <div class="container">
+    <wijit-carousel id="colors" auto>
+      <div class="slide red"><h1>Red</h1></div>
+      <div class="slide orange"><h1>Orange</h1></div>
+      <div class="slide yellow"><h1>Yellow</h1></div>
+      <div class="slide green"><h1>Green</h1></div>
+      <button slot="controls">Red</button>
+      <button slot="controls">Orange</button>
+      <button slot="controls">Yellow</button>
+      <button slot="controls">Green</button>
+    </wijit-carousel>
 
 
  <!--  <div class="container">
@@ -174,107 +188,6 @@
   </div> -->
 <!------------ /Component ------------>
 
-<!-- <style>
-  .panel {
-    height: 200px;
-    width: 100%;
-    max-width: 1024px;
-    overflow: hidden;
-    --direction: forwards;
-    --pause: 2;
-    --elements: 4;
-    --duration: calc(1s * var(--pause) * var(--elements));
-  }
-
-  .panel[data-animated="true"] {
-    overflow: hidden;
-  }
-
-  .panel[data-direction="right"] {
-    --direction: reverse;
-  }
-
-  .slider {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .panel[data-animated="true"] .slider {
-    animation-name: scroll;
-    animation-duration: var(--duration);
-    animation-timing-function: ease-in-out;
-    animation-delay: 0s;
-    animation-iteration-count: infinite;
-    animation-direction: forward;
-    animation-fill-mode: none;
-    animation-play-state: running;
-
-    flex-wrap: nowrap;
-    width: fit-content;
-  }
-
-  .slider > img {
-    height: 100%;
-    object-fit: cover;
-  }
-
-
-  @keyframes scroll {
-    0%, 20% { transform: translate(0); }
-    25%, 45% { transform: translate(-12.5%); }
-    50%, 70% { transform: translate(-25%); }
-    75%, 95% { transform: translate(-37.5%); }
-    100% { transform: translate(-50%); }
-  }
-</style> -->
-
-
-<!-- <div class="wijit">
-  <div class="panel" data-count="4" data-pause="1">
-
-    <div class="slider">
-      <img src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
-      <img src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
-      <img src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
-      <img src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
-    </div>
-
-  </div>
-</div> -->
-
-
-
-<script>
-  const scrollers = document.querySelectorAll('.panel');
-  if (!window.matchMedia("(prefers-reduced-motion:reduce)").matches) {
-    addAnimation();
-  }
-
-  function addAnimation() {
-    scrollers.forEach (scroller => {
-      scroller.setAttribute('data-animated', 'true');
-
-      const scrollerInner = scroller.querySelector('.slider');
-      const scrollerContent = Array.from(scrollerInner.children);
-
-      scrollerContent.forEach ((item, idx) => {
-        const dupe = item.cloneNode(true);
-        dupe.setAttribute('aria-hidden', true);
-        scrollerInner.append(dupe);
-      });
-    });
-  }
-
-  function pause(evt) {
-    const container = evt.target.closest('.scroller-container');
-    const scroller = container.querySelector('.slider');
-    const computed = window.getComputedStyle(scroller);
-    const state = computed.getPropertyValue('animation-play-state');
-    const newState = (state ==='running') ? 'paused' : 'running';
-    scroller.style.animationPlayState = newState;
-  }
-</script>
-
 <!--------- extra ---------->
   <dialog>
     <p>Hello World!</p>
@@ -284,10 +197,18 @@
   </dialog>
 
   <script>
-
     function change(evt, attr) {
       const el = document.querySelector('wijit-carousel');
       el.setAttribute(attr, evt.target.value);
+    }
+
+    function pause(evt) {
+      const container = evt.target.closest('.scroller-container');
+      const scroller = container.querySelector('.slider');
+      const computed = window.getComputedStyle(scroller);
+      const state = computed.getPropertyValue('animation-play-state');
+      const newState = (state ==='running') ? 'paused' : 'running';
+      scroller.style.animationPlayState = newState;
     }
 
     function popup(evt, msg) {

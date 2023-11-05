@@ -3,62 +3,43 @@
   { box-sizing: border-box; }
 
 /******** WijitBar ********/
-  wijit-carousel#space-pics {
-    width: 90%;
-    height: 300px;
+  wijit-carousel {
+    border-radius: 20px;
   }
 
-  /**** For images having different heights, normalize them all ****/
-  wijit-carousel#space-pics > img {
-    object-fit: cover;
-/*    object-position: 0 -300px;*/
-    margin: 0;
+  /* "container" holds the slides and controls */
+  /* Inherits many css properties from wijit-carousel */
+  wijit-carousel::part(container) {
+    border: 1px dotted gray;
+  }
+
+  /* "panel" holds just the slides */
+  /* Inherits many css properties from container */
+  wijit-carousel::part(panel) {
+    border: none;
+    height: 300px;
+    margin-bottom: 1ch;
   }
 
   wijit-carousel#forms {
     width: 400px;
   }
 
-/**** Each panel is wrapped in <aside> tag if not already present ****/
-  wijit-carousel aside
-  {
-/*    border: 1px dotted var(--bordercolor);*/
-/*    height: 100%;*/
-/*    margin-bottom: 1rem;*/
-/*    position: relative;*/
-/*    text-align: center;*/
-  }
-
-  /**** button controls under second example ****/
+  /* button controls under second example */
   wijit-carousel > button
-  {
-/*    border-radius: 0; */
-  }
+  { border-radius: 0; }
 
   wijit-carousel > button:first-of-type
-  {
-/*    border-radius: 10px 0 0 10px; */
-  }
+  { border-radius: 10px 0 0 10px; }
 
   wijit-carousel > button:last-of-type
-  {
-/*    border-radius: 0 10px 10px 0; */
-  }
+  { border-radius: 0 10px 10px 0; }
 
 
-  /**** Set the height for the container holding the panels (or slides) in the carousel ****/
-  wijit-carousel::part(panel) {
-    /* Setting "overflow" to any value breaks the flip effect */
-    /* Setting a height smaller than the tallest element breaks the flip effect */
-
-  }
-
- /* wijit-carousel#forms {
-    width:400px
-  }*/
 
 /******** General ********/
-  html {
+  html
+  {
     font-size: 16px;
     height: 100%;
     width: 100%;
@@ -94,6 +75,9 @@
     box-shadow: none;
   }
 
+  button[disabled]
+  { box-shadow: none; }
+
   details > *
   {
     background: white;
@@ -108,9 +92,8 @@
     border-radius: 10px;
   }
 
-  #docs fieldset {
-    margin-bottom: 1rem;
-  }
+  #docs fieldset
+  { margin-bottom: 1rem; }
 
   h1
   {
@@ -145,13 +128,11 @@
   summary
   { cursor: pointer; }
 
-  summary:hover {
-    box-shadow: 2px 2px 5px var(--bordercolor);
-  }
+  summary:hover
+  { box-shadow: 2px 2px 5px var(--bordercolor); }
 
-  summary:active {
-    box-shadow: none;
-  }
+  summary:active
+  { box-shadow: none; }
 
 
   .container

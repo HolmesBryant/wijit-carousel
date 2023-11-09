@@ -10,7 +10,7 @@
   /* "container" holds the slides and controls */
   /* Inherits many css properties from wijit-carousel */
   wijit-carousel::part(container) {
-    border: 1px dotted gray;
+/*    border: 1px dotted gray;*/
   }
 
   /* "panel" holds just the slides */
@@ -66,7 +66,7 @@
   button:hover
   {
     border-style: outset;
-    box-shadow: 2px 2px 2px var(--bordercolor);
+    box-shadow: 0px 0px 5px var(--bordercolor);
   }
 
   button:active
@@ -76,7 +76,12 @@
   }
 
   button[disabled]
-  { box-shadow: none; }
+  {
+    box-shadow: none;
+    color: inherit;
+    cursor: not-allowed;
+    opacity: 1;
+  }
 
   details > *
   {
@@ -92,7 +97,7 @@
     border-radius: 10px;
   }
 
-  #docs fieldset
+  #settings fieldset
   { margin-bottom: 1rem; }
 
   h1
@@ -146,6 +151,19 @@
     justify-content: center;
     margin-bottom: 1rem;
     padding: 10px;
+  }
+
+  .active {
+    background: lemonchiffon;
+  }
+
+  .active2 {
+    background: rgb(255,248,0);
+    background: radial-gradient(circle, rgba(255,248,0,1) 0%, rgba(253,29,29,1) 50%, rgba(252,176,69,1) 100%);
+  }
+
+  .active3 {
+    box-shadow: 0 0 10px rebeccapurple;
   }
 
 /******** Menu Button ********/

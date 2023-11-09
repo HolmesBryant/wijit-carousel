@@ -11,7 +11,6 @@
     .slide { padding: 1em }
     .red { background: darkred }
     .orange { background: orange }
-    .yellow { background: yellow }
     .green { background: green }
   </style>
 </head>
@@ -21,15 +20,22 @@
     <details>
       <summary><h1>Carousel Web Component</h1></summary>
       <p>
-        Renders a carousel style widget.
+        Creates a carousel with a variety of effects.
       </p>
       <div>
         <h3>Attributes</h3>
         <ul>
-          <li><b>effect</b> optional (default: fade) The transition effect. Options are "fade", "slide" and "flip".</li>
-          <li><b>auto</b> optional (default: false) Add this attribute to auto-play a slide show</li>
-          <li><b>repeat</b> optional (default: 0) How many times to auto-repeat the slide show. Has no effect if "auto" attribute is not set. "0" means infinite repeat.</li>
-          <li><b>delay</b> optional (default: 4) How many seconds to show each panel. Has no effect if "auto" attribute is not set.</li>
+          <li><b>effect</b> (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'.</li>
+          <li><b>speed</b> (default: 1) How fast the transition happens, in seconds. Values below .2 (point two) create unexpected behavior.</li>
+          <li><b>activeindicator</b> (default: 'active')The name of the css class to apply to the control associated with the active slide. Do not include a dot (.)</li>
+          <li><b>autocontrols</b> If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs.</li>
+          <li><b>Autoplay Options</b>
+            <ul>
+              <li><b>auto</b> (default: false) Whether to automatically advance the slides</li>
+              <li><b>repeat</b> (default: 0) How many times to loop through the whole set of slides. 0 means infinite iterations.</li>
+              <li><b>pause</b> (default: 3) Number of seconds to pause between transitions.</li>
+            </ul>
+          </li>
         </ul>
       </div>
 
@@ -50,7 +56,7 @@
     </details>
   </p>
 
-  <div id="docs">
+  <div id="settings">
     <fieldset>
       <legend>Available Attributes</legend>
       <label>
@@ -59,12 +65,18 @@
           <option value="fade">Default (fade)</option>
           <option>slide</option>
           <option>flip</option>
+          <option>random</option>
         </select>
       </label>
 
       <label>
+        speed: <span id="speed">1 second</span><br>
+        <input type="range" min=".5" max="5" value="1" step=".5" oninput="change(event, 'speed')">
+      </label>
+
+      <label>
         activeclass<br>
-        <select onchange="change(event, 'activeclass')">
+        <select onchange="change(event, 'activeindicator')">
           <option value="active">Default (active)</option>
           <option>active2</option>
           <option>active3</option>
@@ -74,7 +86,7 @@
       <fieldset>
         <legend>Autoplay Options</legend>
       <label>
-        auto (wait for it)<br>
+        auto<br>
         <select onchange="change(event, 'auto')">
           <option value="false">Default (false)</option>
           <option>true</option>
@@ -82,141 +94,51 @@
       </label>
 
       <label>
-        repeat<br>
-        <input type="number" value="0" placeholder="Default: 0 (infinite)" oninput="change(event, 'repeat')">
+        repeat: <span id="repeat">0 (Infinite)</span><br>
+        <input type="range" min="0" max="5" value="0" oninput="change(event, 'repeat')">
       </label>
 
       <label>
-        pause<br>
-        <input type="number" value="3" placeholder="Default: 3" oninput="change(event, 'pause')">
+        pause: <span id="pause">3 seconds</span><br>
+        <input type="range" min=".25" max="5" step=".25" value="3" oninput="change(event, 'pause')">
       </label>
     </fieldset>
 
     </fieldset>
   </div>
 
-
 <!---------- Component ------------>
-  <!-- <div class="container">
-    <p>Images courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA</a></p>
-
-    <wijit-carousel id="space-pics">
-        <img id="i0" alt="IMAGE 0" src="https://images-assets.nasa.gov/image/PIA12348/PIA12348~medium.jpg">
-        <img id="i1" alt="IMAGE 1" src="https://images-assets.nasa.gov/image/iss044e045215/iss044e045215~medium.jpg">
-        <img id="i2" alt="IMAGE 2" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
-        <img id="i3" alt="IMAGE 3" src="https://images-assets.nasa.gov/image/PIA13014/PIA13014~medium.jpg">
-      <input type="radio" name="imgcontrols" slot="controls">
-      <input type="radio" name="imgcontrols" slot="controls">
-      <input type="radio" name="imgcontrols" slot="controls">
-      <input type="radio" name="imgcontrols" slot="controls">
-    </wijit-carousel>
-  </div> -->
 
   <div class="container">
-    <wijit-carousel id="colors" auto>
+    <wijit-carousel id="colors">
       <div class="slide red"><h1>Red</h1></div>
       <div class="slide orange"><h1>Orange</h1></div>
-      <div class="slide yellow"><h1>Yellow</h1></div>
+      <img alt="Astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
       <div class="slide green"><h1>Green</h1></div>
       <button slot="controls">Red</button>
       <button slot="controls">Orange</button>
-      <button slot="controls">Yellow</button>
+      <button slot="controls">Astronaut</button>
       <button slot="controls">Green</button>
     </wijit-carousel>
 
-
- <!--  <div class="container">
-    <wijit-carousel effect="flip" id="forms">
-      <fieldset>
-        <legend>Log In</legend>
-        <form onsubmit="popup(event, '<h3>Nothing was submitted</h3>')">
-          <p>
-            <label>
-              Username<br>
-              <input autocomplete="username">
-            </label>
-          </p>
-          <p>
-            <label>
-              Password<br>
-              <input type="password" autocomplete="current-password">
-            </label>
-          </p>
-
-          <button type="submit">Log In</button>
-        </form>
-      </fieldset>
-
-      <fieldset>
-        <legend>Register</legend>
-        <form onsubmit="popup(event, '<h3>Nothing was submitted</h3>')">
-          <p>
-              <input placeholder="First Name" autocomplete="given-name">
-          </p>
-          <p>
-              <input placeholder="Last Name" autocomplete="given-name">
-          </p>
-          <p>
-              <input placeholder="User Name" autocomplete="username">
-          </p>
-          <p>
-              <input type="password" placeholder="Password" autocomplete="current-password">
-            </label>
-          </p>
-
-          <button type="submit">Register</button>
-        </form>
-      </fieldset>
-
-      <fieldset>
-        <legend>Forgot Password</legend>
-        <form onsubmit="popup(event, '<h3>Nothing was submitted</h3>')">
-          <p>
-            <label>
-              <input type="email" autocomplete="email" placeholder="Your Email">
-            </label>
-          </p>
-
-          <button type="submit">Send Password Reset Link!</button>
-        </form>
-      </fieldset>
-
-      <button slot="controls">Log In</button>
-      <button slot="controls">Register</button>
-      <button slot="controls">Forgot Passpwrd</button>
-    </wijit-carousel>
-  </div> -->
 <!------------ /Component ------------>
-
-<!--------- extra ---------->
-  <dialog>
-    <p>Hello World!</p>
-    <form method="dialog">
-      <button>OK</button>
-    </form>
-  </dialog>
 
   <script>
     function change(evt, attr) {
       const el = document.querySelector('wijit-carousel');
       el.setAttribute(attr, evt.target.value);
-    }
-
-    function pause(evt) {
-      const container = evt.target.closest('.scroller-container');
-      const scroller = container.querySelector('.slider');
-      const computed = window.getComputedStyle(scroller);
-      const state = computed.getPropertyValue('animation-play-state');
-      const newState = (state ==='running') ? 'paused' : 'running';
-      scroller.style.animationPlayState = newState;
-    }
-
-    function popup(evt, msg) {
-      evt.preventDefault();
-      const dialog = document.querySelector('dialog');
-      const p = dialog.querySelector('p');
-      p.innerHTML = msg;
-      dialog.showModal();
+      switch (attr) {
+      case 'speed':
+        document.querySelector('#speed').innerText = `${evt.target.value} seconds`;
+        break;
+      case 'pause':
+        document.querySelector('#pause').innerText = `${evt.target.value} seconds`;
+        break;
+      case 'repeat':
+        const value = evt.target.value == '0' ? '0 (infinite)' : evt.target.value;
+        document.querySelector('#repeat').innerText = value;
+        break;
+      }
     }
   </script>
 

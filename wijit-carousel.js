@@ -106,6 +106,8 @@ export class WijitCarousel extends HTMLElement {
 	 */
 	#bag = {};
 
+	observers = [];
+
 	/**
 	 * An array of attributes to observe for changes.
 	 * @static
@@ -509,7 +511,7 @@ export class WijitCarousel extends HTMLElement {
 	 * @return {[type]} [description]
 	 */
 	stopAuto() {
-		clearInterval(this.autoInterval);
+		this.auto = false;
 	}
 
 	/**
@@ -537,7 +539,21 @@ export class WijitCarousel extends HTMLElement {
 			iteration = 1;
 			return;
 		}
+	}
 
+	subscribe(observer) {
+		// observer is a function
+		this.observers.push(observer);
+	}
+
+	unsubscribe(observer) {
+		this.observers = this.observers.filter((ob) => ob !== observer);
+	}
+
+	notify(property, newval) {
+		for (const observer of this.observers) {
+			observer(property, newval);
+		}
 	}
 
 	/**
@@ -576,12 +592,14 @@ export class WijitCarousel extends HTMLElement {
 	get auto () { return this.#auto; }
 	set auto (value) {
 		// Anything other than 'true' or empty string is FALSE
-		this.#auto = (value === 'true' || value === '') ? true : false;
+		this.#auto = (value === true || value === 'true' || value === '') ? true : false;
+		this.notify('auto', this.#auto);
+
 		if (this.#auto) {
 			this.startAuto();
 		} else {
 			//if value is 'false' or any other value
-			this.stopAuto();
+			clearInterval(this.autoInterval);
 		}
 	}
 
@@ -589,6 +607,7 @@ export class WijitCarousel extends HTMLElement {
 	set repeat (value) {
 		value = parseInt(value);
 		this.#repeat = value;
+		this.notify('repeat', value);
 		this.iteration = 0;
 		this.resetAuto();
 	}

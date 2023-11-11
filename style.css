@@ -2,7 +2,7 @@
   *, ::before, ::after
   { box-sizing: border-box; }
 
-/******** WijitBar ********/
+/******** Wijit ********/
   wijit-carousel {
     border-radius: 20px;
   }
@@ -22,11 +22,7 @@
   /* "controls" holds just the controls */
   wijit-carousel::part(controls) {}
 
-  wijit-carousel#forms {
-    width: 400px;
-  }
-
-  /* button controls under second example */
+  /* button controls */
   wijit-carousel > button
   { border-radius: 0; }
 
@@ -36,6 +32,13 @@
   wijit-carousel > button:last-of-type
   { border-radius: 0 10px 10px 0; }
 
+  /* The slide css class is applied manually in the html page*/
+  wijit-carousel .slide {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+  }
 
 
 /******** General ********/
@@ -286,15 +289,14 @@
   .commands button:last-of-type
   { border-radius: 0 10px 10px 0; }
 
-/******** Modal ********/
+/******** Example Form ********/
 
-  ::backdrop {
-    background-image: linear-gradient(
-      45deg,
-      magenta,
-      rebeccapurple,
-      dodgerblue,
-      green
-    );
-    opacity: 0.75;
+  #example-form fieldset {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+  }
+
+  #example-form input {
+    width: 100%;
   }

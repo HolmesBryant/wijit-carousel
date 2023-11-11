@@ -8,8 +8,6 @@
   <script defer type="module" src="wijit-carousel.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
-    .slide { padding: 1em }
-    .red { background: darkred }
     .orange { background: orange }
     .green { background: green }
   </style>
@@ -28,7 +26,7 @@
           <li><b>effect</b> (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'. The 'random' effect is just used for testing. It isn't really meant for production.</li>
           <li><b>speed</b> (default: 1) How fast the transition happens, in seconds. Values below .2 (point two) create unexpected behavior.</li>
           <li><b>activeindicator</b> (default: 'active')The name of the css class to apply to the control associated with the active slide. Do not include a dot (.)</li>
-          <li><b>autocontrols</b> If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs.</li>
+          <li><b>autocontrols</b> If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs. If you use autocontrols, do not add your own controls</li>
           <li><b>Autoplay Options</b>
             <ul>
               <li><b>auto</b> (default: false) Whether to automatically advance the slides</li>
@@ -42,21 +40,29 @@
       <div>
         <h3>Usage</h3>
           <code><pre>
-            &lt;script type="module" src="wijit-carousel.js"&gt;&lt;/script&gt;
-            &lt;wijit-carousel&gt;
-              &lt;div&gt;Foo&lt;/div&gt;
-              &lt;div&gt;Bar&lt;/div&gt;
-              &lt;div&gt;Baz&lt;/div&gt;
-              &lt;button slot="controls"&gt;Foo&lt;/button&gt;
-              &lt;button slot="controls"&gt;Bar&lt;/button&gt;
-              &lt;button slot="controls"&gt;Baz&lt;/button&gt;
-            &lt;/wijit-carousel&gt;
+            &lt;head&gt;
+              &lt;script defer type="module" src="wijit-carousel.js"&gt;&lt;/script&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+              &lt;wijit-carousel&gt;
+                &lt;div&gt;Foo&lt;/div&gt;
+                &lt;div&gt;Bar&lt;/div&gt;
+                &lt;div&gt;Baz&lt;/div&gt;
+                &lt;button slot="controls"&gt;Foo&lt;/button&gt;
+                &lt;button slot="controls"&gt;Bar&lt;/button&gt;
+                &lt;button slot="controls"&gt;Baz&lt;/button&gt;
+              &lt;/wijit-carousel&gt;
+            &lt;/body&gt;
           </pre></code>
       </div>
+
+      <div>
+        <h3>Note</h3>
+        <p>When you click on a control, auto-play is automatically disabled.</p>
     </details>
   </p>
 
-  <div id="settings">
+  <div id="settings" data-with="#my-carousel">
     <fieldset>
       <legend>Available Attributes</legend>
       <label>
@@ -87,7 +93,7 @@
         <legend>Autoplay Options</legend>
       <label>
         auto<br>
-        <input type="checkbox" value="true" onchange="change(event,'auto')">
+        <input type="checkbox" value="true" data-bind="auto" onchange="change(event,'auto')">
       </label>
 
       <label>
@@ -107,15 +113,30 @@
 <!---------- Component ------------>
 
   <div class="container">
-    <wijit-carousel id="colors">
-      <div class="slide red"><h1>Red</h1></div>
+    <wijit-carousel id="my-carousel">
       <div class="slide orange"><h1>Orange</h1></div>
       <img alt="Astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
       <div class="slide green"><h1>Green</h1></div>
-      <button slot="controls">Red</button>
+      <div class="slide">
+        <form id="example-form" onsubmit="event.preventDefault()">
+          <fieldset>
+            <legend>A Form</legend>
+            <label>
+              Foo<br>
+              <input placeholder="Foo">
+            </label>
+            <label>
+              Bar<br>
+              <input placeholder="Bar">
+            </label>
+            <button type="submit">Foo Bar!</button>
+          </fieldset>
+        </form>
+      </div>
       <button slot="controls">Orange</button>
       <button slot="controls">Astronaut</button>
       <button slot="controls">Green</button>
+      <button slot="controls">Foo Bar</button>
     </wijit-carousel>
 
 <!------------ /Component ------------>
@@ -140,6 +161,33 @@
 
       el.setAttribute(attr, value);
     }
+
+    customElements.whenDefined('wijit-carousel')
+    .then (() => {
+      const instance = document.querySelector('#my-carousel');
+      const binds = document.querySelectorAll('*[data-bind]');
+
+      instance.addEventListener('click', event => {
+        // component uses click() during autoplay to advance slides, so check isTrusted
+        if (!event.isTrusted) return;
+        const ignore = ['input', 'button']
+        if (ignore.indexOf(event.target.localName) === -1) {
+          instance.auto = !instance.auto;
+        }
+      });
+
+      for (const bind of binds) {
+        const property = bind.getAttribute('data-bind');
+        instance.subscribe ((prop, val) => {
+          if (prop !== property) return;
+          switch (prop) {
+          case 'auto':
+            bind.checked = val;
+            break;
+          }
+        });
+      }
+    });
   </script>
 
 </body>

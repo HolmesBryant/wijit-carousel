@@ -4,9 +4,39 @@ Creates a carousel with a variety of effects.
 
 Demo: https://holmesbryant.github.io/wijit-carousel/
 
+Slides and controls can be styled normally using css. In special cases, you may need to add styling to elements in the shadow root. In that case you can use the css selectors:
+
+*   wijit-carousel::part(container)
+*   wijit-carousel::part(panel)
+*   wijit-carousel::part(card)
+*   wijit-carousel::part(controls)
+
+
+The shadow root looks like this:
+
+        `<div id="container" part="container">
+          <div id="panel" part="panel" class="smooth">
+            <div id="carda" part="card">
+              <slot name="carda"></slot>
+            </div>
+            <div id="cardb" part="card">
+              <slot name="cardb"></slot>
+            </div>
+          </div>
+          <div id="controls" part="controls">
+            <slot name="controls"></slot>
+          </div>
+        </div>
+        <div id="slides" class="hidden" aria-hidden="true">
+          <slot></slot>
+        </div>`
+
+
+You don't need to manually assign slides to the 'carda' or 'cardb' slots. That is done automatically.
+
 ### Attributes
 
-*   **effect** (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'.
+*   **effect** (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'. There is also a 'random' effect, but it is just used for testing. It isn't really meant for production.
 
 *   **speed** (default: 1) How fast the transition happens, in seconds. Values below .2 (point two) create unexpected behavior.
 
@@ -17,7 +47,7 @@ Demo: https://holmesbryant.github.io/wijit-carousel/
 *   **Autoplay Options**
     *   **auto** (default: false) Whether to automatically advance the slides
     *   **repeat** (default: 0) How many times to loop through the whole set of slides. 0 means infinite iterations.
-    *   **pause** (default: 3) Number of seconds to pause between transitions.
+    *   **pause** (default: 3) Number of seconds to pause between transitions. Values below 1.2 break the transition effect.
 
 ### Usage
 

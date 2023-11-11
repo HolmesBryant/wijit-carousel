@@ -9,9 +9,7 @@
 
   /* "container" holds the slides and controls */
   /* Inherits many css properties from wijit-carousel */
-  wijit-carousel::part(container) {
-/*    border: 1px dotted gray;*/
-  }
+  wijit-carousel::part(container) {}
 
   /* "panel" holds just the slides */
   /* Inherits many css properties from container */
@@ -20,6 +18,9 @@
     height: 300px;
     margin-bottom: 1ch;
   }
+
+  /* "controls" holds just the controls */
+  wijit-carousel::part(controls) {}
 
   wijit-carousel#forms {
     width: 400px;
@@ -121,10 +122,17 @@
     height: 35px;
   }
 
+  select,
+  input:not([type=range]) {
+    margin: 2.5px 0;
+  }
+
   label
   {
+    cursor: pointer;
     display: inline-block;
     margin: 5px;
+    vertical-align: bottom;
   }
 
   legend

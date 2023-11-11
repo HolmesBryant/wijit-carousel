@@ -25,7 +25,7 @@
       <div>
         <h3>Attributes</h3>
         <ul>
-          <li><b>effect</b> (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'.</li>
+          <li><b>effect</b> (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'. The 'random' effect is just used for testing. It isn't really meant for production.</li>
           <li><b>speed</b> (default: 1) How fast the transition happens, in seconds. Values below .2 (point two) create unexpected behavior.</li>
           <li><b>activeindicator</b> (default: 'active')The name of the css class to apply to the control associated with the active slide. Do not include a dot (.)</li>
           <li><b>autocontrols</b> If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs.</li>
@@ -33,7 +33,7 @@
             <ul>
               <li><b>auto</b> (default: false) Whether to automatically advance the slides</li>
               <li><b>repeat</b> (default: 0) How many times to loop through the whole set of slides. 0 means infinite iterations.</li>
-              <li><b>pause</b> (default: 3) Number of seconds to pause between transitions.</li>
+              <li><b>pause</b> (default: 3) Number of seconds to pause between transitions. Values below 1.2 break the transition effect.</li>
             </ul>
           </li>
         </ul>
@@ -87,10 +87,7 @@
         <legend>Autoplay Options</legend>
       <label>
         auto<br>
-        <select onchange="change(event, 'auto')">
-          <option value="false">Default (false)</option>
-          <option>true</option>
-        </select>
+        <input type="checkbox" value="true" onchange="change(event,'auto')">
       </label>
 
       <label>
@@ -100,7 +97,7 @@
 
       <label>
         pause: <span id="pause">3 seconds</span><br>
-        <input type="range" min=".25" max="5" step=".25" value="3" oninput="change(event, 'pause')">
+        <input type="range" min="1.5" max="5" step=".5" value="3" oninput="change(event, 'pause')">
       </label>
     </fieldset>
 
@@ -126,19 +123,22 @@
   <script>
     function change(evt, attr) {
       const el = document.querySelector('wijit-carousel');
-      el.setAttribute(attr, evt.target.value);
+      let notify = `${evt.target.value} seconds`;
+      let value = evt.target.value;
+
       switch (attr) {
-      case 'speed':
-        document.querySelector('#speed').innerText = `${evt.target.value} seconds`;
-        break;
-      case 'pause':
-        document.querySelector('#pause').innerText = `${evt.target.value} seconds`;
+      case 'auto':
+        value = evt.target.checked ? 'true' : 'false';
         break;
       case 'repeat':
-        const value = evt.target.value == '0' ? '0 (infinite)' : evt.target.value;
-        document.querySelector('#repeat').innerText = value;
+        notify = (value == '0') ? '0 (infinite)' : value;
+      case 'speed':
+      case 'pause':
+        document.getElementById(attr).innerText = notify;
         break;
       }
+
+      el.setAttribute(attr, value);
     }
   </script>
 

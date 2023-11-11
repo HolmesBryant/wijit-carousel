@@ -35,6 +35,12 @@ export class WijitCarousel extends HTMLElement {
 	#effect = 'fade';
 
 	/**
+	 * The speed of each transition in seconds.
+	 * @private
+	 */
+	#speed = 1;
+
+	/**
 	 * Whether to automatically play the carousel.
 	 * @private
 	 */
@@ -45,12 +51,6 @@ export class WijitCarousel extends HTMLElement {
 	 * @private
 	 */
 	#repeat = 0;
-
-	/**
-	 * The speed of each transition in seconds.
-	 * @private
-	 */
-	#speed = 1;
 
 	/**
 	 * The pause between slides in seconds.
@@ -95,7 +95,7 @@ export class WijitCarousel extends HTMLElement {
 	controls;
 
 	/**
-	 * The current iteration of the carousel.
+	 * The current iteration of the carousel. Used for autoPlay
 	 * @private
 	 */
 	iteration = 1;
@@ -499,7 +499,9 @@ export class WijitCarousel extends HTMLElement {
 	 */
 	startAuto() {
 		const delay = this.pause * 1000;
-		this.autoInterval = setInterval (() => this.autoPlay(this.iteration++), delay);
+		this.autoInterval = setInterval (() => {
+			this.autoPlay(this.iteration++);
+		}, delay);
 	}
 
 	/**
@@ -517,7 +519,9 @@ export class WijitCarousel extends HTMLElement {
 		const delay = this.pause * 1000;
 		if (!this.auto) return;
 		this.stopAuto();
-		this.autoInterval = setInterval(() => this.autoPlay(this.iteration++), delay);
+		this.autoInterval = setInterval(() => {
+			this.autoPlay(this.iteration++);
+		}, delay);
 	}
 
 	/**
@@ -525,13 +529,15 @@ export class WijitCarousel extends HTMLElement {
 	 *
 	 */
 	autoPlay(iteration) {
-		if (iteration == this.repeat) {
+		const count = this.slides.length * this.repeat;
+		const idx = iteration % this.controls.length;
+		this.controls[idx].click();
+		if (count !== 0 && iteration >= count) {
 			this.stopAuto();
+			iteration = 1;
 			return;
 		}
 
-		const idx = iteration % this.controls.length;
-		this.controls[idx].click();
 	}
 
 	/**
@@ -560,9 +566,16 @@ export class WijitCarousel extends HTMLElement {
 		}
 	}
 
+	get speed () { return this.#speed; }
+	set speed (value) {
+		value = parseFloat(value);
+		this.#speed = value;
+		this.style.setProperty('--speed', `${value}s`)
+	}
+
 	get auto () { return this.#auto; }
 	set auto (value) {
-		// if value is 'true' or empty string
+		// Anything other than 'true' or empty string is FALSE
 		this.#auto = (value === 'true' || value === '') ? true : false;
 		if (this.#auto) {
 			this.startAuto();
@@ -576,19 +589,17 @@ export class WijitCarousel extends HTMLElement {
 	set repeat (value) {
 		value = parseInt(value);
 		this.#repeat = value;
-	}
-
-	get speed () { return this.#speed; }
-	set speed (value) {
-		value = parseFloat(value);
-		this.#speed = value;
-		this.style.setProperty('--speed', `${value}s`)
+		this.iteration = 0;
+		this.resetAuto();
 	}
 
 	get pause () { return this.#pause; }
 	set pause (value) {
 		value = parseFloat(value);
 		this.#pause = value;
+		if (this.iteration >= this.slides.length * this.repeat) {
+			this.iteration = 0;
+		}
 		this.resetAuto();
 	}
 

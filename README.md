@@ -69,4 +69,4 @@ The shadow root looks like this:
         </div>`
 
 
-You don't need to manually assign slides to the 'carda' or 'cardb' slots. That is done automatically.
+Do not manually assign slides to the 'carda' or 'cardb' slots. That is done automatically.

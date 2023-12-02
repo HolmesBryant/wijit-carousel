@@ -146,7 +146,6 @@ export class WijitCarousel extends HTMLElement {
 				overflow: hidden;
 				perspective: 1800px;
 				position: relative;
-				transition: all var(--speed);
 			}
 
 			#container.flip { overflow: unset; }

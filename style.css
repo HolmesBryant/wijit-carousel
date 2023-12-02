@@ -5,7 +5,7 @@
 /******** Wijit ********/
   wijit-carousel {
     border-radius: 20px;
-    transition: all .5s;
+/*    transition: all .5s;*/
   }
 
   wijit-carousel:not(:defined) {

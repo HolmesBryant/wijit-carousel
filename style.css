@@ -5,6 +5,11 @@
 /******** Wijit ********/
   wijit-carousel {
     border-radius: 20px;
+    transition: all .5s;
+  }
+
+  wijit-carousel:not(:defined) {
+    opacity: 0;
   }
 
   /* "container" holds the slides and controls */
@@ -151,6 +156,9 @@
   summary:active
   { box-shadow: none; }
 
+  .active {
+    opacity: 1;
+  }
 
   .container
   {
@@ -165,12 +173,11 @@
     padding: 10px;
   }
 
-  .active {
+  .active-control {
     background: lemonchiffon;
   }
 
-  .active2 {
-    background: rgb(255,248,0);
+  .active-control2 {
     background: radial-gradient(circle, rgba(255,248,0,1) 0%, rgba(253,29,29,1) 50%, rgba(252,176,69,1) 100%);
   }
 

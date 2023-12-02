@@ -68,7 +68,7 @@ export class WijitCarousel extends HTMLElement {
 	 * The class to add to the active control.
 	 * @private
 	 */
-	#activeindicator = 'active';
+	#activeindicator = 'active-control';
 
 	/**
 	 * The shadow root of the custom element.
@@ -144,8 +144,9 @@ export class WijitCarousel extends HTMLElement {
 				flex-direction: column;
 				height: 100%;
 				overflow: hidden;
-				perspective: 1000px;
+				perspective: 1800px;
 				position: relative;
+				transition: all var(--speed);
 			}
 
 			#container.flip { overflow: unset; }

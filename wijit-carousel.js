@@ -524,6 +524,8 @@ export class WijitCarousel extends HTMLElement {
 		this.autoInterval = setInterval(() => {
 			this.autoPlay(this.iteration++);
 		}, delay);
+		this.#auto = true;
+		this.notify('auto', this.#auto);
 	}
 
 	/**
@@ -630,7 +632,6 @@ export class WijitCarousel extends HTMLElement {
 
 	get activeindicator () { return this.#activeindicator; }
 	set activeindicator (value) {
-		console.log('activeindicator', value);
 		this.#activeindicator = value;
 	}
 }

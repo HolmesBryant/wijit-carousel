@@ -124,91 +124,91 @@ export class WijitCarousel extends HTMLElement {
 		super();
 		this.shadow = this.attachShadow({mode: 'open'});
 		this.shadow.innerHTML = `
-		<style>
-			:host {
-				display: block;
-				height: 100%;
-				scroll-behavior: smooth;
-				width: 100%;
-				--speed: ${this.speed}s;
-			}
+			<style>
+				:host {
+					display: block;
+					height: 100%;
+					scroll-behavior: smooth;
+					width: 100%;
+					--speed: ${this.speed}s;
+				}
 
-			::slotted([slot=carda]),
-			::slotted([slot=cardb]) {
-				height: 100%;
-				width: 100%;
-				object-fit: cover;
-			}
+				::slotted([slot=carda]),
+				::slotted([slot=cardb]) {
+					height: 100%;
+					width: 100%;
+					object-fit: cover;
+				}
 
-			#container {
-				all: inherit;
-				align-items: center;
-				display: flex;
-				flex-direction: column;
-				height: 100%;
-				overflow: hidden;
-				perspective: 1800px;
-				position: relative;
-			}
+				#container {
+					all: inherit;
+					align-items: center;
+					display: flex;
+					flex-direction: column;
+					height: 100%;
+					overflow: hidden;
+					perspective: 1800px;
+					position: relative;
+				}
 
-			#container.flip { overflow: unset; }
+				#container.flip { overflow: unset; }
 
-			#panel {
-				all: inherit;
-				display: block;
-				height: 100%;
-				overflow: visible;
-				position: relative;
-				transition-property: all;
-				transform-style: preserve-3d;
-				white-space: nowrap;
-				width: 100%;
-			}
+				#panel {
+					all: inherit;
+					display: block;
+					height: 100%;
+					overflow: visible;
+					position: relative;
+					transition-property: all;
+					transform-style: preserve-3d;
+					white-space: nowrap;
+					width: 100%;
+				}
 
-			#panel.smooth { transition-duration: var(--speed); }
+				#panel.smooth { transition-duration: var(--speed); }
 
-			#container.flip #carda,
-			#container.flip #cardb {
-				height: 100%;
-				overflow: hidden;
-				position: absolute;
-				backface-visibility: hidden;
-				width: 100%;
-			}
+				#container.flip #carda,
+				#container.flip #cardb {
+					height: 100%;
+					overflow: hidden;
+					position: absolute;
+					backface-visibility: hidden;
+					width: 100%;
+				}
 
-			#container.flip #carda { transform: rotateY(0deg); }
-			#container.flip #cardb { transform: rotateY(180deg); }
+				#container.flip #carda { transform: rotateY(0deg); }
+				#container.flip #cardb { transform: rotateY(180deg); }
 
-			#carda,
-			#cardb {
-				border-radius: inherit;
-				display: inline-block;
-				height: 100%;
-				overflow: hidden;
-				vertical-align: top;
-				width: 100%;
-			}
+				#carda,
+				#cardb {
+					border-radius: inherit;
+					display: inline-block;
+					height: 100%;
+					overflow: hidden;
+					vertical-align: top;
+					width: 100%;
+				}
 
-			#controls { display: flex; }
-			.hidden { display: none; }
+				#controls { display: flex; }
+				.hidden { display: none; }
 
-			/* Touch devices */
-			/*@media (hover: none) {
-				.scroller { overflow-x: auto; }
-			}*/
-		</style>
+				/* Touch devices */
+				/*@media (hover: none) {
+					.scroller { overflow-x: auto; }
+				}*/
+			</style>
 
-		<div id="container" part="container">
-			<div id="panel" part="panel" class="smooth">
-				<div id="carda" part="card"><slot name="carda"></slot></div>
-				<div id="cardb" part="card"><slot name="cardb"></slot></div>
+			<div id="container" part="container">
+				<div id="panel" part="panel" class="smooth">
+					<div id="carda" part="card"><slot name="carda"></slot></div>
+					<div id="cardb" part="card"><slot name="cardb"></slot></div>
+				</div>
+				<div id="controls" part="controls">
+					<slot name="controls"></slot>
+				</div>
 			</div>
-			<div id="controls" part="controls">
-				<slot name="controls"></slot>
-			</div>
-		</div>
-		<div id="slides" class="hidden" aria-hidden="true"><slot></slot></div>
-		`;
+			<div id="slides" class="hidden" aria-hidden="true"><slot></slot></div>
+			`;
 	}
 
 	/**

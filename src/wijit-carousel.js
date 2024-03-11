@@ -26,6 +26,24 @@
  */
 export class WijitCarousel extends HTMLElement {
 	/**
+	 * The attribute name to add to the active control.
+	 * @public
+	 */
+	activeindicator = 'active';
+
+	/**
+	 * Whether to make the automatically generated controls visible
+	 * @private
+	 */
+	#controls = false;
+
+	/**
+	 * Whether to automatically play the carousel.
+	 * @private
+	 */
+	#autoplay = false;
+
+	/**
 	 * The available effects for the carousel.
 	 * @private
 	 */
@@ -35,25 +53,7 @@ export class WijitCarousel extends HTMLElement {
 	 * The current effect being used.
 	 * @private
 	 */
-	#effect = 'fade';
-
-	/**
-	 * The speed of each transition in seconds.
-	 * @private
-	 */
-	#speed = 1;
-
-	/**
-	 * Whether to automatically play the carousel.
-	 * @private
-	 */
-	#auto = false;
-
-	/**
-	 * The number of times to repeat the carousel. 0 means repeat infinitly.
-	 * @private
-	 */
-	#repeat = 0;
+	#effect = 'slide';
 
 	/**
 	 * The pause between slides in seconds.
@@ -62,40 +62,19 @@ export class WijitCarousel extends HTMLElement {
 	#pause = 3;
 
 	/**
-	 * Whether to make the automatically generated controls visible
+	 * The number of times to repeat the carousel. 0 means repeat infinitly.
 	 * @private
 	 */
-	#autocontrols = false;
+	#repeat = 0;
 
 	/**
-	 * The class to add to the active control.
+	 * The speed of each transition in seconds.
 	 * @private
+	 * @type {float}
 	 */
-	#activeindicator = 'active-control';
+	#speed = '1';
 
-	/**
-	 * The shadow root of the custom element.
-	 * @private
-	 */
-	shadow = ShadowRoot;
-
-	/**
-	 * The panel element that holds the slides.
-	 * @private
-	 */
-	panel;
-
-	/**
-	 * The slides of the carousel.
-	 * @private
-	 */
-	slides;
-
-	/**
-	 * The controls of the carousel.
-	 * @private
-	 */
-	controls;
+	currentSlot = 'carda';
 
 	/**
 	 * The current iteration of the carousel. Used for autoPlay
@@ -103,94 +82,133 @@ export class WijitCarousel extends HTMLElement {
 	 */
 	iteration = 1;
 
-	/**
-	 * An object to store the old and new values of attributes.
-	 * @private
-	 */
-	#bag = {};
-
-	observers = [];
+	carouselControls = [];
 
 	/**
 	 * An array of attributes to observe for changes.
 	 * @static
 	 */
-	static observedAttributes = ['effect', 'auto', 'repeat', 'speed', 'pause', 'autocontrols', 'activeindicator'];
+	static observedAttributes = ['autoplay', 'controls', 'effect', 'pause', 'repeat', 'speed'];
 
 	/**
 	 * Constructs a new WijitCarousel instance.
 	 */
 	constructor() {
 		super();
-		this.shadow = this.attachShadow({mode: 'open'});
-		this.shadow.innerHTML = `
+		this.attachShadow( { mode:'open' } );
+		this.shadowRoot.innerHTML = `
 			<style>
 				:host {
-					display: block;
-					height: 100%;
-					scroll-behavior: smooth;
-					width: 100%;
+					--overflow: hidden;
+					--panel-height: 300px;
+					--perspective: 1800px;
+					--perspective-origin: center;
 					--speed: ${this.speed}s;
+					--transition-timing: ease-out;
+					display: block;
 				}
 
-				::slotted([slot=carda]),
-				::slotted([slot=cardb]) {
-					height: 100%;
-					width: 100%;
-					object-fit: cover;
+				.hidden {
+					display: none;
 				}
-
-				#container {
-					all: inherit;
-					align-items: center;
-					display: flex;
-					flex-direction: column;
-					height: 100%;
-					overflow: hidden;
-					perspective: 1800px;
-					position: relative;
-				}
-
-				#container.flip { overflow: unset; }
 
 				#panel {
-					all: inherit;
-					display: block;
-					height: 100%;
-					overflow: visible;
+					height: var(--panel-height);
+					opacity: 1;
+					overflow: hidden;
 					position: relative;
-					transition-property: all;
-					transform-style: preserve-3d;
+          transform-style: preserve-3d;
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
 					white-space: nowrap;
 					width: 100%;
+					perspective: var(--perspective);
+					perspective-origin: var(--perspective-origin);
 				}
 
-				#panel.smooth { transition-duration: var(--speed); }
+				#panel.fade-out {
+					opacity: 0;
+				}
 
-				#container.flip #carda,
-				#container.flip #cardb {
+				#panel.flipped {
+					overflow: visible;
+				}
+
+				#panel.flipped #carda,
+				#panel.flipped #cardb {
+          backface-visibility: hidden;
 					height: 100%;
-					overflow: hidden;
-					position: absolute;
-					backface-visibility: hidden;
-					width: 100%;
+          position: absolute;
+          width: 100%;
 				}
 
-				#container.flip #carda { transform: rotateY(0deg); }
-				#container.flip #cardb { transform: rotateY(180deg); }
+				#panel.a.flipped #cardb {
+					transform: rotateY(-180deg);
+				}
+
+				#panel.b.flipped #carda {
+					transform: rotateY(-180deg);
+				}
+
+				#panel.a.flip #carda {
+					transform: rotateY(180deg);
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+				}
+
+				#panel.a.flip #cardb {
+					transform: rotateY(0deg);
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+				}
+
+				#panel.b.flip #carda {
+					transform: rotateY(0deg);
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+				}
+
+				#panel.b.flip #cardb {
+					transform: rotateY(180deg);
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+				}
+
+				#panel.slide-left #carda,
+				#panel.slide-left #cardb {
+					left: -100%;
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+				}
+
+				#panel.b.slip-left #carda {
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+					width: 0%;
+				}
+
+				#panel.a.slip-left #cardb {
+					transition: all var(--speed);
+					transition-timing-function: var(--transition-timing);
+					width: 0%;
+				}
 
 				#carda,
 				#cardb {
-					border-radius: inherit;
 					display: inline-block;
 					height: 100%;
-					overflow: hidden;
+					left: 0;
+					overflow: var(--overflow);
+					position: relative;
+					text-align: center;
 					vertical-align: top;
+					white-space: wrap;
 					width: 100%;
 				}
 
-				#controls { display: flex; }
-				.hidden { display: none; }
+				#controls {
+					text-align: center;
+				}
 
 				/* Touch devices */
 				/*@media (hover: none) {
@@ -199,7 +217,7 @@ export class WijitCarousel extends HTMLElement {
 			</style>
 
 			<div id="container" part="container">
-				<div id="panel" part="panel" class="smooth">
+				<div id="panel" part="panel">
 					<div id="carda" part="card"><slot name="carda"></slot></div>
 					<div id="cardb" part="card"><slot name="cardb"></slot></div>
 				</div>
@@ -207,7 +225,7 @@ export class WijitCarousel extends HTMLElement {
 					<slot name="controls"></slot>
 				</div>
 			</div>
-			<div id="slides" class="hidden" aria-hidden="true"><slot></slot></div>
+			<div hidden id="slides" class="hidden"><slot></slot></div>
 			`;
 	}
 
@@ -218,9 +236,7 @@ export class WijitCarousel extends HTMLElement {
 	 * @param {string} oldval The old value of the attribute.
 	 * @param {string} newval The new value of the attribute.
 	 */
-	attributeChangedCallback(attr, oldval, newval) {
-		const old = oldval || this[attr];
-		this.#bag[attr] = {new:newval, old:old};
+	attributeChangedCallback( attr, oldval, newval ) {
 		this[attr] = newval;
 	}
 
@@ -228,23 +244,26 @@ export class WijitCarousel extends HTMLElement {
 	 * Called after the custom element is inserted into the document.
 	 */
 	connectedCallback() {
-		this.container = this.shadow.querySelector('#container');
-		this.panel = this.shadow.querySelector('#panel');
-		this.cardA = this.shadow.querySelector('#carda');
-		this.cardB = this.shadow.querySelector('#cardb');
-		this.slides = [...this.children].filter (item => !item.hasAttribute('slot'));
-		this.controls = this.querySelectorAll('*[slot=controls]');
-		this.slides[0].setAttribute('slot', 'carda');
+		this.slides = Array.from( this.children ).filter( current => !current.hasAttribute( 'slot' ) );
+		let controls = this.querySelectorAll( '*[slot=controls]' );
+		if ( this.slides ) this.initSlides( this.slides );
+		if ( controls.length === 0 ) controls = this.createControls();
+		this.carouselControls = this.initControls( controls );
+	}
 
-		this.effect = this.getAttribute('effect') || this.effect;
-		this.speed = this.getAttribute('speed') || this.speed;
+	initSlides( slides ) {
+		let i = 0;
+		slides[0].setAttribute('slot', 'carda');
 
-		if (this.controls.length === 0) this.createControls();
-		this.initControls();
+		for ( i; i < slides.length; i++ ) {
+			slides[i].setAttribute( 'data-slide', i);
+		}
+
+		return slides;
 	}
 
 	/**
-	 * Creates the controls for the carousel for internal use if user did not include them.
+	 * Creates the controls for the carousel if user did not include them.
 	 */
 	createControls() {
 		const frag = new DocumentFragment();
@@ -253,47 +272,38 @@ export class WijitCarousel extends HTMLElement {
 		input.name = 'c' + Math.random();
 		input.setAttribute('slot', 'controls');
 
-		if (!this.autocontrols) {
-			input.setAttribute('aria-hidden', 'true');
-			input.setAttribute('hidden', 'true');
-		}
-
-		this.slides.forEach ( slide => {
+		this.slides.forEach ( ( slide, idx ) => {
 			const control = input.cloneNode(true);
-			frag.append(control);
+			if ( idx === 0 ) control.checked = true;
+			if ( !this.controls ) control.setAttribute( 'hidden', 'true' );
+			frag.append( control );
 		});
 
-		this.controls = frag.querySelectorAll('input');
-		this.controls[0].checked = true;
+		const controls = frag.querySelectorAll('input');
+		controls[0].checked = true;
 		this.append(frag);
+		return controls;
 	}
 
 	/**
 	 * Initializes the carousel controls if user supplies them
 	 */
-	initControls() {
-		for (let i = 0; i < this.controls.length; i++) {
-			// if there are more controls than panels, ignore the extra controls.
-			if (!this.slides[i]) continue;
-			this.slides[i].setAttribute('data-panel', i);
-			this.controls[i].setAttribute('data-target', i);
-			this.controls[i].addEventListener('click', evt => {
-				// preventDefault prevents inputs from being auto focused;
-				if (evt.target.localName !== 'input') evt.preventDefault();
+	initControls( controls ) {
+		let i = 0;
+		controls[0].setAttribute( this.activeindicator, 'true' );
 
-				for (const control of this.controls) {
-					control.classList.remove(this.activeindicator);
-					if (this.#bag.activeindicator) {
-						control.classList.remove(this.#bag.activeindicator.old);
-					}
+		for ( i; i < controls.length; i++ ) {
+			controls[i].setAttribute( 'data-target', i );
+			controls[i].addEventListener( 'click', event => {
+				this.transition( event );
+				for ( const control of controls ) {
+					control.removeAttribute( this.activeindicator );
+					event.target.setAttribute( this.activeindicator, 'true' );
 				}
-
-				// if the control was clicked by a human, turn off autoPlay
-				if (evt.isTrusted) this.stopAuto();
-				evt.target.classList.add(this.activeindicator);
-				this.transition(evt);
 			});
 		}
+
+		return controls;
 	}
 
 	/**
@@ -301,209 +311,85 @@ export class WijitCarousel extends HTMLElement {
 	 *
 	 * @param {Event} event The click event that triggered the transition.
 	 */
-	transition(event) {
-		const rando = this.#effects[Math.floor(Math.random() * this.#effects.length)];
-		const effect = (this.effect === 'random') ? rando : this.effect;
+	transition( event ) {
+		const panel = this.shadowRoot.querySelector( '#panel' );
+		const target = event.target.getAttribute( 'data-target' );
+		const currentSlide = this.querySelector( `[slot='${this.currentSlot}']` );
+		const targetSlide = this.querySelector( `[data-slide='${target}']` );
+		const nextSlot = ( this.currentSlot === 'carda' ) ? 'cardb' : 'carda';
+		if ( currentSlide === targetSlide ) return;
 
-		// Update the `effect` property with the new effect.
-		this.#bag.effect.old = this.#bag.effect.new;
-		this.#bag.effect.new = effect;
+		targetSlide.setAttribute( 'slot', nextSlot);
+		this.currentSlot = nextSlot;
 
-		// Disable controls during the transition.
-		this.disableControlsDuringTransition();
-
-		// If the effect has changed, initialize the new effect.
-		if (this.#bag.effect.old !== this.#bag.effect.new) {
-			this.initEffect(effect);
-		}
-
-		switch (effect) {
-		case 'slide':
-			this.slideEffect(event);
+		switch (this.effect) {
+		case 'slip':
+			// effect breaks if 'which' is moved to top of function
+			const whichSlip = (this.currentSlot === 'carda') ? 'a' : 'b';
+			panel.classList.add(whichSlip);
+			panel.classList.add( 'slip-left' );
+			this.endEffect( targetSlide, ['slip-left', whichSlip]);
+			break;
+		case 'fade':
+			panel.classList.add( 'fade-out' );
+			this.endEffect( targetSlide, ['fade-out']);
 			break;
 		case 'flip':
-			this.flipEffect(event);
+			// effect breaks if 'which' is moved to top of function
+			const whichFlip = (this.currentSlot === 'carda') ? 'b' : 'a';
+			panel.classList.add('flipped');
+			panel.classList.add(whichFlip);
+			setTimeout( () => { panel.classList.add('flip') }, 5 );
+			this.endEffect( targetSlide, ['flipped', whichFlip, 'flip']);
 			break;
 		default:
-			this.fadeEffect(event);
+			panel.classList.add('slide-left');
+			this.endEffect( targetSlide, ['slide-left']);
 			break;
 		}
 	}
 
-	/**
-	 * Initializes the specified effect for the carousel.
-	 *
-	 * @param {string} effect The effect to initialize.
-	 */
-	initEffect(effect) {
-		const activeCard = this.panel.children[0].id || 'carda';
-		const otherCard = this.panel.children[1].id || 'cardb';
+	endEffect( target, cssClass = [] ) {
+		const panel = this.shadowRoot.querySelector( '#panel' );
+		let abortcontroller = new AbortController();
 
-		// Get the active and other card elements.
-		const activeElem = this.querySelector(`*[slot=${activeCard}]`);
-		const otherElem = this.querySelector(`*[slot=${otherCard}]`);
+		panel.addEventListener( 'transitionend', event => {
+			abortcontroller.abort();
+			abortcontroller = null;
 
-		// If no active Element is found, use otherElem as the active Element.
-		const elem = activeElem || otherElem;
-
-		// Move the active element to the `carda` slot.
-		elem.setAttribute('slot', 'carda');
-
-		// Remove any existing transform styles from the panel.
-		this.panel.style.removeProperty('transform');
-
-		switch (effect) {
-		case 'slide':
-		  this.container.classList.remove('flip');
-		  break;
-
-		case 'flip':
-		  this.container.classList.add('flip');
-		  break;
-
-		case 'random':
-		  break;
-
-		default:
-		  this.container.classList.remove('flip');
-		  break;
-		}
-	}
-
-	/**
-	 * Transitions the carousel to the specified slide using a slide effect.
-	 *
-	 * @param {Event} evt The click event that triggered the transition.
-	 * @param {boolean} smooth Whether to use a smooth transition.
-	 */
-	slideEffect(evt, smooth = true) {
-		const idx = evt.target.getAttribute('data-target');
-		const offset = this.panel.children[1].offsetLeft;
-		const distance = `-${offset}px`;
-		const delay = (smooth) ? this.speed * 1000 : 0;
-
-		// Get the next and current slot names.
-		const nextSlot = this.panel.children[1].querySelector('slot').name;
-		const currentSlot = (nextSlot === 'carda') ? 'cardb' : 'carda';
-
-		// Get the current element in the current slot.
-		const currentElem = this.querySelector(`*[slot=${currentSlot}]`);
-
-		// Check if the clicked slide is the currently active slide.
-		if (this.slides[idx] === currentElem) return;
-
-		// Move the clicked slide to the next slot.
-		this.slides[idx].setAttribute('slot', nextSlot);
-
-		// Apply the `translate` property to animate the slide.
-		this.panel.style.translate = distance;
-
-		// After the transition delay, remove the `smooth` class to disable smooth transitions.
-		setTimeout(() => {
-		this.panel.classList.remove('smooth');
-
-		// Append the first child element to the end of the panel.
-		this.panel.append(this.panel.children[0]);
-
-		// Reset the `translate` property to hide the previous slide.
-		this.panel.style.translate = 0;
-
-		// Remove the `slot` attribute from all slides except the active slide.
-		this.slides.forEach((slide) => {
-		  if (slide !== this.slides[idx]) {
-		    slide.removeAttribute('slot');
-		  }
-		});
-
-		// After a short delay, re-enable smooth transitions.
-		setTimeout(() => {
-		  this.panel.classList.add('smooth');
-		}, 100);
-		}, delay);
-	}
-
-	/**
-	 * Transitions the carousel to the specified slide using a fade effect.
-	 *
-	 * @param {Event} evt The click event that triggered the transition.
-	 * @param {boolean} smooth Whether to use a smooth transition.
-	 */
-	fadeEffect(evt, smooth = false) {
-		const idx = evt.target.getAttribute('data-target');
-		const delay = this.speed * 1000;
-
-		// Set the opacity of the panel to 0 to hide the current slide.
-		this.panel.style.opacity = '0.0';
-
-		// After the transition delay, perform the slide effect and re-enable smooth transitions.
-		setTimeout(() => {
-			this.slideEffect(evt, smooth);
-
-			// Remove the opacity property to show the newly active slide.
-			setTimeout (() => {
-				this.panel.classList.add('smooth');
-				this.panel.style.removeProperty('opacity');
-			}, 100)
-		}, delay);
-	}
-
-	/**
-	 * Transitions the carousel to the specified slide using a flip effect.
-	 *
-	 * @param {Event} evt The click event that triggered the transition.
-	 */
-	flipEffect(evt) {
-		const currentRotation = this.getTransformValue(this.panel.style.transform);
-		const modulus = (currentRotation / 180) % 2;
-		const rotate = currentRotation + 180;
-		const delay = this.speed * 1000;
-		const idx = evt.target.getAttribute('data-target');
-		const currentSlot = (modulus === 0) ? 'carda' : 'cardb';
-		const nextSlot = (modulus === 0) ? 'cardb' : 'carda';
-		const currentElem = this.querySelector(`*[slot=${currentSlot}]`);
-
-		// Check if the clicked slide is the currently active slide.
-		if (this.slides[idx] === currentElem) return;
-
-		// Move the clicked slide to the next slot.
-		this.slides[idx].setAttribute('slot', nextSlot);
-
-		// Apply the `rotateY` property to animate the flip.
-		this.panel.style.transform = `rotateY(${rotate}deg)`;
-
-		// After the transition delay, remove the `slot` attribute from all slides except the active slide.
-		setTimeout(() => {
-			this.slides.forEach((slide) => {
-			 	if (slide !== this.slides[idx]) {
-					slide.removeAttribute('slot');
-				}
-			});
-		}, delay);
-	}
-
-	/**
-	 * Disable the carousel controls during a slide transition
-	 */
-	disableControlsDuringTransition() {
-		const delay = this.speed * 1000;
-		for (const control of this.controls) {
-			control.disabled = true;
-			control.classList.add('disabled');
-		}
-
-		setTimeout (() => {
-			for (const control of this.controls) {
-				control.disabled = false;
-				control.classList.remove('disabled');
+			const nextSlot = ( this.currentSlot === 'carda') ? 'cardb' : 'carda';
+			const nextSlide = this.querySelector(`[slot=${nextSlot}]`);
+			const nextCard = panel.querySelector(`#${nextSlot}`);
+			nextSlide.removeAttribute( 'slot' );
+			for (const cls of cssClass ) {
+				panel.classList.remove( cls );
 			}
-		}, delay);
+			panel.append (nextCard);
+			this.enableControls();
+		}, { signal:abortcontroller.signal } );
+
+		this.disableControls();
+	}
+
+	disableControls( controls = this.carouselControls ) {
+		for ( const control of controls ) {
+			control.disabled = true;
+		}
+	}
+
+	enableControls( controls = this.carouselControls ) {
+		for ( const control of controls ) {
+			control.disabled = false;
+		}
 	}
 
 	/**
 	 * Start AutpPlay to automatically advance the slides
 	 */
 	startAuto() {
-		const delay = this.pause * 1000;
+		let delay = ( this.pause * 1000 ) + ( this.speed * 1000 );
+		if ( this.pause <= 0 ) delay = 0;
+		this.autoPlay(this.iteration++);
 		this.autoInterval = setInterval (() => {
 			this.autoPlay(this.iteration++);
 		}, delay);
@@ -514,129 +400,83 @@ export class WijitCarousel extends HTMLElement {
 	 * @return {[type]} [description]
 	 */
 	stopAuto() {
-		this.auto = false;
+		clearInterval(this.autoInterval);
 	}
 
-	/**
-	 * Reset AutoPlay when [pause] is changed while AutoPlay is running
-	 */
-	resetAuto() {
-		const delay = this.pause * 1000;
-		if (!this.auto) return;
-		this.stopAuto();
-		this.autoInterval = setInterval(() => {
-			this.autoPlay(this.iteration++);
-		}, delay);
-		this.#auto = true;
-		this.notify('auto', this.#auto);
-	}
-
-	/**
-	 * A method used by startAuto to monitor iterations and activate the next slide
-	 *
-	 */
-	autoPlay(iteration) {
+	autoPlay( iteration = this.iteration ) {
 		const count = this.slides.length * this.repeat;
-		const idx = iteration % this.controls.length;
-		this.controls[idx].click();
+		const idx = iteration % this.carouselControls.length;
+		this.carouselControls[idx].click();
 		if (count !== 0 && iteration >= count) {
 			this.stopAuto();
-			iteration = 1;
+			this.iteration = 1;
 			return;
 		}
 	}
 
-	subscribe(observer) {
-		// observer is a function
-		this.observers.push(observer);
-	}
-
-	unsubscribe(observer) {
-		this.observers = this.observers.filter((ob) => ob !== observer);
-	}
-
-	notify(property, newval) {
-		for (const observer of this.observers) {
-			observer(property, newval);
-		}
-	}
-
-	/**
-	 * Takes a css transform value, like '.5s', and returns a number
-	 * @param  {string}	getTransformValue	The css transform value
-	 * @return {integer}
-	 */
-	getTransformValue(transformValue) {
-		let ret = 0;
-		if (transformValue) {
-			const re = /(\d+)(\w+)/;
-			const matches = transformValue.match(re);
-			ret = parseInt(matches[1]);
+	get autoplay () { return this.#autoplay; }
+	set autoplay ( value ) {
+		switch (value) {
+		case 'false':
+		case false:
+			value = false;
+			this.stopAuto();
+			break;
+		default:
+			value = true;
+			this.startAuto();
 		}
 
-		return ret;
+		this.#autoplay = value;
+	}
+
+	get controls () { return this.#controls; }
+	set controls ( value ) {
+		switch ( value ) {
+		case 'false':
+		case false:
+			value = false;
+			break;
+		default:
+			value = true;
+		}
+		this.#controls = value;
 	}
 
 	get effect () { return this.#effect; }
-	set effect (value) {
+	set effect ( value ) {
 		this.#effect = value;
-		const oldEffect = this.#bag.effect ? this.#bag.effect.old : null;
-		this.#bag.effect = {new: value, old: oldEffect};
-		if (this.#bag.effect.new !== this.#bag.effect.old) {
-			this.initEffect(value);
+	}
+
+	get pause () { return this.#pause; }
+	set pause ( value ) {
+		value = parseFloat( value );
+		if ( value <= 0 ) {
+			this.style.setProperty('--transition-timing', 'ease-in-out');
 		}
-	}
-
-	get speed () { return this.#speed; }
-	set speed (value) {
-		value = parseFloat(value);
-		this.#speed = value;
-		this.style.setProperty('--speed', `${value}s`)
-	}
-
-	get auto () { return this.#auto; }
-	set auto (value) {
-		// Anything other than 'true' or empty string is FALSE
-		this.#auto = (value === true || value === 'true' || value === '') ? true : false;
-		this.notify('auto', this.#auto);
-
-		if (this.#auto) {
+		this.#pause = value;
+		if ( this.autoplay ) {
+			this.stopAuto();
 			this.startAuto();
-		} else {
-			//if value is 'false' or any other value
-			clearInterval(this.autoInterval);
 		}
 	}
 
 	get repeat () { return this.#repeat; }
-	set repeat (value) {
-		value = parseInt(value);
+	set repeat ( value ) {
 		this.#repeat = value;
-		this.notify('repeat', value);
-		this.iteration = 0;
-		this.resetAuto();
 	}
 
-	get pause () { return this.#pause; }
-	set pause (value) {
-		value = parseFloat(value);
-		this.#pause = value;
-		if (this.iteration >= this.slides.length * this.repeat) {
-			this.iteration = 0;
+	get speed() { return this.#speed; }
+	set speed( value ) {
+		value = parseFloat( value );
+		this.#speed = value;
+		this.style.setProperty('--speed', `${value}s`);
+		if ( this.autoplay ) {
+			this.stopAuto();
+			this.startAuto();
 		}
-		this.resetAuto();
 	}
 
-	get autocontrols () { return this.#autocontrols; }
-	set autocontrols (value) {
-		// if value is 'true' or empty string
-		this.#autocontrols = (value === 'true' || value === '') ? true : false;
-	}
-
-	get activeindicator () { return this.#activeindicator; }
-	set activeindicator (value) {
-		this.#activeindicator = value;
-	}
 }
 
 document.addEventListener('DOMContentLoaded', customElements.define('wijit-carousel', WijitCarousel));

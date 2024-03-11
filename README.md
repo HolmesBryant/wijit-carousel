@@ -1,8 +1,20 @@
 # Carousel Web Component
 
 Creates a carousel with a variety of effects.
+( More documentation is in process )
 
 Demo: https://holmesbryant.github.io/wijit-carousel/
+
+## Changelog
+
+- v2.0
+    - Complete rewrite
+    - Changed the observed attribute "autocontrols" to "controls".
+    - Changed the observed attribute "auto" to "autoplay".
+    - Removed "activeclass" from list of observed attributes.
+    - Added 'slip' to list of effects
+    - Exposed CSS variables "--panel-height", "--perspective", "--perspective-origin".
+
 
 ### Attributes
 
@@ -10,34 +22,42 @@ Demo: https://holmesbryant.github.io/wijit-carousel/
 
 *   **speed** (default: 1) How fast the transition happens, in seconds. Values below .2 (point two) create unexpected behavior.
 
-*   **activeindicator** (default: 'active')The name of the css class to apply to the control associated with the active slide. Do not include a dot (.)
-
-*   **autocontrols** If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs. If you use autocontrols, do not add your own controls.
+*   **controls** If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs. If you use autocontrols, do not add your own controls.
 
 *   **Autoplay Options**
-    *   **auto** (default: false) Whether to automatically advance the slides
+    *   **autoplay** (default: false) Whether to automatically advance the slides
     *   **repeat** (default: 0) How many times to loop through the whole set of slides. 0 means infinite iterations.
-    *   **pause** (default: 3) Number of seconds to pause between transitions. Values below 1.2 break the transition effect.
+    *   **pause** (default: 3) Number of seconds to pause between transitions. Values approaching "0" may produce unexpected behavior.
 
 ### Usage
 
           <head>
-            <script defer type="module" src="wijit-carousel.js"></script>
+            <script type="module" src="wijit-carousel.js"></script>
           </head>
+
           <body>
             <wijit-carousel>
-              <div>Foo</div>
-              <div>Bar</div>
+
+              <img src="/path/to/img">
+
+              <figure>
+                <img src="path/to/img">
+                <figcaption>A caption</figcaption>
+              </figure>
+
               <div>Baz</div>
+
+              <!-- optional -->
               <button slot="controls">Foo</button>
               <button slot="controls">Bar</button>
               <button slot="controls">Baz</button>
+
             </wijit-carousel>
           </body>
 
 ### Controls
 
-You may add your own controls. They can be buttons, radio inputs, links or any other valid HTML element. Be sure to include the same number of controls as slides and assign each control to the slot "controls". Click handlers are automatically applied to them. You may use the custom attribute [autocontrols] to automatically include basic radio inputs. If you do this, do not include your own controls. Note that when a user clicks on a control, auto-play is automatically disabled.
+You may add your own controls. They can be buttons, radio inputs, links or any other valid HTML element. Be sure to include the same number of controls as slides and assign each control to the slot "controls". Click handlers are automatically applied to them. You may use the custom attribute [controls] to automatically include basic radio inputs (which you can style using your own css). If you do this, do not include your own controls. Note that when a user clicks on a control, auto-play is automatically disabled.
 
 ### Styling
 
@@ -52,7 +72,7 @@ Slides and controls can be styled normally using css. In special cases, you may 
 The shadow root looks like this:
 
         `<div id="container" part="container">
-          <div id="panel" part="panel" class="smooth">
+          <div id="panel" part="panel">
             <div id="carda" part="card">
               <slot name="carda"></slot>
             </div>
@@ -64,7 +84,7 @@ The shadow root looks like this:
             <slot name="controls"></slot>
           </div>
         </div>
-        <div id="slides" class="hidden" aria-hidden="true">
+        <div hidden id="slides">
           <slot></slot>
         </div>`
 

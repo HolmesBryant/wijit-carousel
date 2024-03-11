@@ -5,188 +5,229 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>Carousel Web Component</title>
-  <script defer type="module" src="wijit-carousel.js"></script>
+  <!-- <script type="module" src="src/wijit-carousel.js"></script> -->
+  <script type="module" src="dist/wijit-carousel.min.js"></script>
+  <script type="module" src="extra/wijit-form.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
-    .orange { background: orange }
-    .green { background: green }
+    wijit-form {
+      --accent-color: orange;
+    }
+
+    wijit-carousel {
+      border: 1pc solid transparent;
+    }
+
+    wijit-carousel > img {
+      height: 100%;
+    }
+
+    wijit-carousel figure {
+      margin: 0;
+    }
+
+    wijit-carousel button[active] {
+      background-color: var(--accent-color);
+    }
+
+    wijit-carousel > input {
+      appearance: none;
+      background-color: var(--bg3-color);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      cursor: pointer;
+      height: 35px;
+      position: relative;
+      width: 35px;
+    }
+
+    wijit-carousel > input:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    wijit-carousel > input:checked:before {
+      outline: 2px solid var(--accent-color);
+      border-radius: 50%;
+      color: var(--accent-color);
+      content: "⬤";
+      font-size: x-large;
+      line-height: 0;
+      position: absolute;
+      display: flex;
+      height: 100%;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 </head>
 
 <body>
-  <p>
-    <details>
-      <summary><h1>Carousel Web Component</h1></summary>
-      <p>
-        Creates a carousel with a variety of effects.
-      </p>
-      <div>
-        <h3>Attributes</h3>
-        <ul>
-          <li><b>effect</b> (default: fade) The transition effect. Options are 'fade', 'slide', 'flip'. The 'random' effect is just used for testing. It isn't really meant for production.</li>
-          <li><b>speed</b> (default: 1) How fast the transition happens, in seconds. Values below .2 (point two) create unexpected behavior.</li>
-          <li><b>activeindicator</b> (default: 'active')The name of the css class to apply to the control associated with the active slide. Do not include a dot (.)</li>
-          <li><b>autocontrols</b> If present, will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs. If you use autocontrols, do not add your own controls</li>
-          <li><b>Autoplay Options</b>
-            <ul>
-              <li><b>auto</b> (default: false) Whether to automatically advance the slides</li>
-              <li><b>repeat</b> (default: 0) How many times to loop through the whole set of slides. 0 means infinite iterations.</li>
-              <li><b>pause</b> (default: 3) Number of seconds to pause between transitions. Values below 1.2 break the transition effect.</li>
-            </ul>
-          </li>
-        </ul>
-      </div>
+  <h1>Wijit-Carousel web component</h1>
+  <strong>Creates a carousel with a variety of effects</strong>
+  <details>
+    <summary>Instructions</summary>
+    <div id="instructions"> </div>
+  </details>
 
-      <div>
-        <h3>Usage</h3>
-          <code><pre>
-            &lt;head&gt;
-              &lt;script defer type="module" src="wijit-carousel.js"&gt;&lt;/script&gt;
-            &lt;/head&gt;
-            &lt;body&gt;
-              &lt;wijit-carousel&gt;
-                &lt;div&gt;Foo&lt;/div&gt;
-                &lt;div&gt;Bar&lt;/div&gt;
-                &lt;div&gt;Baz&lt;/div&gt;
-                &lt;button slot="controls"&gt;Foo&lt;/button&gt;
-                &lt;button slot="controls"&gt;Bar&lt;/button&gt;
-                &lt;button slot="controls"&gt;Baz&lt;/button&gt;
-              &lt;/wijit-carousel&gt;
-            &lt;/body&gt;
-          </pre></code>
-      </div>
+  <section id="demo">
+    <wijit-form data-with="#my-carousel">
+      <section class="row">
+        <section>
+          <div>
+            <label for="demo-effect">effect</label>
+            <select
+            id="demo-effect"
+            size='5'
+            onchange="change(event, 'effect')">
+              <option selected value="slide">slide (default)</option>
+              <option>slip</option>
+              <option>fade</option>
+              <option>flip</option>
+            </select>
+          </div>
 
-      <div>
-        <h3>Note</h3>
-        <p>When you click on a control, auto-play is automatically disabled.</p>
-    </details>
-  </p>
-
-  <div id="settings" data-with="#my-carousel">
-    <fieldset>
-      <legend>Available Attributes</legend>
-      <label>
-        effect<br>
-        <select onchange="change(event, 'effect')">
-          <option value="fade">Default (fade)</option>
-          <option>slide</option>
-          <option>flip</option>
-          <option>random</option>
-        </select>
-      </label>
-
-      <label>
-        speed: <span id="speed">1 second</span><br>
-        <input type="range" min=".5" max="5" value="1" step=".5" oninput="change(event, 'speed')">
-      </label>
-
-      <label>
-        activeclass<br>
-        <select onchange="change(event, 'activeindicator')">
-          <option value="active">Default (active)</option>
-          <option>active2</option>
-          <option>active3</option>
-        </select>
-      </label>
-
-      <fieldset>
-        <legend>Autoplay Options</legend>
-      <label>
-        auto<br>
-        <input type="checkbox" value="true" data-bind="auto" onchange="change(event,'auto')">
-      </label>
-
-      <label>
-        repeat: <span id="repeat">0 (Infinite)</span><br>
-        <input type="range" min="0" max="5" value="0" oninput="change(event, 'repeat')">
-      </label>
-
-      <label>
-        pause: <span id="pause">3 seconds</span><br>
-        <input type="range" min="1.5" max="5" step=".5" value="3" oninput="change(event, 'pause')">
-      </label>
-    </fieldset>
-
-    </fieldset>
-  </div>
-
-<!---------- Component ------------>
-
-  <div class="container">
-    <wijit-carousel id="my-carousel">
-      <div class="slide orange"><h1>Orange</h1></div>
-      <img alt="Astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg">
-      <div class="slide green"><h1>Green</h1></div>
-      <div class="slide">
-        <form id="example-form" onsubmit="event.preventDefault()">
-          <fieldset>
-            <legend>A Form</legend>
-            <label>
-              Foo<br>
-              <input placeholder="Foo">
+          <div>
+            <label for="demo-speed">
+              speed (<span id="demo-speed-value">1</span> seconds)
             </label>
-            <label>
-              Bar<br>
-              <input placeholder="Bar">
+            <input id="demo-speed" type="range" min=".5" max="5" value="1" step=".5" onchange="change(event, 'speed')">
+          </div>
+        </section>
+
+        <fieldset>
+          <legend>Autoplay Options</legend>
+
+          <div class="row reverse start">
+            <label for="demo-autoplay">autoplay</label>
+            <input id="demo-autoplay" type="checkbox" value="true" onchange="change(event,'autoplay')">
+          </div>
+
+          <div>
+            <label for="demo-repeat">repeat (default: 0)</label>
+            <input id="demo-repeat" type="number" value="0" oninput="change(event, 'repeat')">
+          </div>
+
+          <div>
+            <label for="demo-pause">pause (default: 3)</label>
+            <input id="demo-pause" type="number" value="3" oninput="change(event, 'pause')">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>CSS variables</legend>
+
+          <div>
+            <label for="demo-overflow">--overflow</label>
+            <select id="demo-overflow" onchange="change(event, '--overflow')">
+              <option value="hidden">hidden (default)</option>
+              <option>visible</option>
+              <option>auto</option>
+              <option>scroll</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="demo-panelheight">--panel-height</label>
+            <select id="demo-panelheight" onchange="change(event, '--panel-height')">
+              <option value="300px">300px (default)</option>
+              <option>100px</option>
+              <option>800px</option>
+              <option>10rem</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="demo-perspective" class="flex">
+              <span>--perspective</span>
+              <span>&nbsp;(flip only)</span>
+          </label>
+            <select id="demo-perspective" onchange="change(event, '--perspective')">
+              <option value="1800px">1800px (default)</option>
+              <option>none</option>
+              <option>800px</option>
+              <option>10px</option>
+              <option>10rem</option>
+              <option>10cm</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="demo-perspectiveorigin" class="flex">
+              <span>--perspective-origin</span>
+              <span>&nbsp;(flip only)</span>
             </label>
-            <button type="submit">Foo Bar!</button>
-          </fieldset>
-        </form>
+            <select id="demo-perspectiveorigin" onchange="change(event, '--perspective-origin')">
+              <option value="center">center (default)</option>
+              <option>top</option>
+              <option>bottom</option>
+            </select>
+          </div>
+        </fieldset>
+      </section>
+    </wijit-form>
+
+    <wijit-carousel id="demo-carousel" controls>
+
+      <img alt="astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
+
+      <div>
+        <h1>HeyThere!</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
       </div>
-      <button slot="controls">Orange</button>
-      <button slot="controls">Astronaut</button>
-      <button slot="controls">Green</button>
-      <button slot="controls">Foo Bar</button>
+
+      <figure class="flex row">
+        <img style="flex:2" src="https://eoimages.gsfc.nasa.gov/images/imagerecords/152000/152531/iss069e092132_front.jpg">
+        <figcaption style="flex:1 1 150px">
+          <p>An image of Earth from space.</p>
+          <small>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></small>
+        </figcaption>
+      </figure>
+
+      <h1>Baz</h1>
+
+
     </wijit-carousel>
-
-<!------------ /Component ------------>
+  </section>
 
   <script>
     function change(evt, attr) {
-      const el = document.querySelector('wijit-carousel');
-      let notify = `${evt.target.value} seconds`;
-      let value = evt.target.value;
+      const el = document.querySelector('#demo-carousel');
+      const speedInfo = document.querySelector('#demo-speed-value')
 
-      switch (attr) {
-      case 'auto':
-        value = evt.target.checked ? 'true' : 'false';
-        break;
-      case 'repeat':
-        notify = (value == '0') ? '0 (infinite)' : value;
-      case 'speed':
-      case 'pause':
-        document.getElementById(attr).innerText = notify;
-        break;
+      if ( attr.startsWith( '--' ) ) {
+        el.style.setProperty(attr, evt.target.value);
+      } else {
+        switch (attr) {
+        case 'autoplay':
+          value = evt.target.checked ? 'true' : 'false';
+          break;
+        case 'speed':
+          value = evt.target.value;
+          speedInfo.textContent = value;
+        default:
+          value = evt.target.value
+          break;
+        }
+
+        el.setAttribute( attr, value );
       }
-      el.setAttribute(attr, value);
     }
 
-    customElements.whenDefined('wijit-carousel')
-    .then (() => {
-      const instance = document.querySelector('#my-carousel');
-      const binds = document.querySelectorAll('*[data-bind]');
-
-      instance.addEventListener('click', event => {
-        // component uses click() during autoplay to advance slides, so check isTrusted
-        if (!event.isTrusted) return;
-        const ignore = ['input', 'button']
-        if (ignore.indexOf(event.target.localName) === -1) {
-          instance.auto = !instance.auto;
-        }
+    /**
+     * Grab the README file and stick it in the "instructions" container
+     */
+    function getReadme () {
+      const elem = document.querySelector('#instructions');
+      fetch ('./README.md')
+      .then (response => response.text())
+      .then (text => {
+        elem.textContent = text;
       });
+    }
 
-      for (const bind of binds) {
-        const property = bind.getAttribute('data-bind');
-        instance.subscribe ((prop, val) => {
-          if (prop !== property) return;
-          switch (prop) {
-          case 'auto':
-            bind.checked = val;
-            break;
-          }
-        });
-      }
-    });
+    getReadme();
   </script>
 
 </body>

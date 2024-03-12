@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>Carousel Web Component</title>
-  <!-- <script type="module" src="src/wijit-carousel.js"></script> -->
-  <script type="module" src="dist/wijit-carousel.min.js"></script>
+  <script type="module" src="src/wijit-carousel.js"></script>
+  <!-- <script type="module" src="dist/wijit-carousel.min.js"></script> -->
   <script type="module" src="extra/wijit-form.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -90,9 +90,9 @@
 
           <div>
             <label for="demo-speed">
-              speed (<span id="demo-speed-value">1</span> seconds)
+              speed (<span id="speed-info">1</span> seconds)
             </label>
-            <input id="demo-speed" type="range" min=".5" max="5" value="1" step=".5" onchange="change(event, 'speed')">
+            <input id="demo-speed" type="range" min=".5" max="5" value="1" step=".5" oninput="change(event, 'speed')">
           </div>
         </section>
 
@@ -110,13 +110,22 @@
           </div>
 
           <div>
-            <label for="demo-pause">pause (default: 3)</label>
-            <input id="demo-pause" type="number" value="3" oninput="change(event, 'pause')">
+            <label for="demo-pause">
+              pause (<span id="pause-info">3</span> seconds)
+            </label>
+            <input
+            id="demo-pause"
+            type="range"
+            min="0.01"
+            max="5"
+            step="0.01"
+            value="3"
+            oninput="change(event, 'pause')">
           </div>
         </fieldset>
 
         <fieldset>
-          <legend>CSS variables</legend>
+        <legend>CSS variables</legend>
 
           <div>
             <label for="demo-overflow">--overflow</label>
@@ -127,6 +136,19 @@
               <option>scroll</option>
             </select>
           </div>
+
+          <div>
+            <label for="demo-transition">--transition-timing</label>
+            <select id="demo-transition" onchange="change(event, '--transition-timing')">
+              <option>ease</option>
+              <option>ease-in</option>
+              <option>ease-out</option>
+              <option>ease-in-out</option>
+              <option>linear</option>
+              <option>step-start</option>
+              <option>steps(10, start)</option>
+              <option>steps(500, jump-both)</option>
+            </select>
 
           <div>
             <label for="demo-panelheight">--panel-height</label>
@@ -169,24 +191,43 @@
     </wijit-form>
 
     <wijit-carousel id="demo-carousel" controls>
+      <figure style="display:grid; grid-template-columns: 200px 200px">
+        <img alt="astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
+        <figcaption style="mix-blend-mode:difference; text-align:left">
+          <h3>Image of Astronaut</h3>
+          <p>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></p>
+        </figcaption>
+      </figure>
 
-      <img alt="astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
-
-      <div>
-        <h1>HeyThere!</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      <div class="flex row" style="height:100%">
+        <wijit-form class="one">
+          <section>
+            <div class="row">
+              <label class="required" for="form-name">Name</label>
+              <input required id="form-name">
+            </div>
+            <div class="row">
+              <label class="required" for="form-email">Email</label>
+              <input required type="email">
+            </div>
+          </section>
+          <button>Sign me up!</button>
+        </wijit-form>
+        <div class="one" style="padding:1rem">
+          <h1>HeyThere!</h1>
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        </div>
       </div>
 
+        <img style="width:100%; object-fit:cover" src="https://images-assets.nasa.gov/image/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
+
       <figure class="flex row">
-        <img style="flex:2" src="https://eoimages.gsfc.nasa.gov/images/imagerecords/152000/152531/iss069e092132_front.jpg">
+        <img style="flex:1" src="https://eoimages.gsfc.nasa.gov/images/imagerecords/152000/152531/iss069e092132_front.jpg">
         <figcaption style="flex:1 1 150px">
           <p>An image of Earth from space.</p>
           <small>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></small>
         </figcaption>
       </figure>
-
-      <h1>Baz</h1>
-
 
     </wijit-carousel>
   </section>
@@ -194,7 +235,6 @@
   <script>
     function change(evt, attr) {
       const el = document.querySelector('#demo-carousel');
-      const speedInfo = document.querySelector('#demo-speed-value')
 
       if ( attr.startsWith( '--' ) ) {
         el.style.setProperty(attr, evt.target.value);
@@ -202,16 +242,33 @@
         switch (attr) {
         case 'autoplay':
           value = evt.target.checked ? 'true' : 'false';
+          el.setAttribute( attr, value );
           break;
+
         case 'speed':
           value = evt.target.value;
+          const speedInfo = document.querySelector('#speed-info');
           speedInfo.textContent = value;
+          setTimeout( () => {
+            el.setAttribute( attr, value );
+          }, 100);
+          break;
+
+        case 'pause':
+          value = event.target.value;
+          const pauseInfo = document.querySelector('#pause-info');
+          pauseInfo.textContent = value;
+          setTimeout( () => {
+            el.setAttribute( attr, value );
+          }, 100)
+          break;
+
         default:
           value = evt.target.value
+          el.setAttribute( attr, value );
           break;
         }
 
-        el.setAttribute( attr, value );
       }
     }
 

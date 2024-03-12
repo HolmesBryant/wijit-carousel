@@ -336,7 +336,7 @@ export default class WijitForm extends HTMLElement {
 			    	line-height: 2.4rem;
 			    }
 
-			    wijit-form label.required
+			    wijit-form label.required:after
 			    { font-size: small }
 
 			    wijit-form button,

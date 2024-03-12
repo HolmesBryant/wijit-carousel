@@ -14,12 +14,13 @@
  * @property {number} repeat - The number of times to repeat the carousel.
  * @property {number} speed - The speed of the carousel in seconds.
  * @property {number} pause - The pause between slides in seconds.
- * @property {string} activeindicator - The class to add to the active indicator.
  *
  *	@example:
  *	<wijit-carousel>
  *	    <div>Panel One</div>
  *	    <img src="Panel_Two.jpg">
+ *
+ * 			<!-- optional -->
  *	    <input slot="controls" type="radio" name="carousel">
  *	    <input slot="controls" type="radio" name="carousel">
  *	</wijit-carousel>
@@ -132,6 +133,7 @@ export class WijitCarousel extends HTMLElement {
 
 				#panel.flipped {
 					overflow: visible;
+					z-index: 1000;
 				}
 
 				#panel.flipped #carda,
@@ -251,6 +253,14 @@ export class WijitCarousel extends HTMLElement {
 		this.carouselControls = this.initControls( controls );
 	}
 
+	/**
+	 * Initialize slides.
+	 * @param  {array} slides - Array of HTML elements
+	 * @return {array}        - The array of slides with 'data-slide' set
+	 *
+	 * @test const slides = [document.createElement('img')];
+	 		self.initSlides(slides).length === 1 // true
+	 */
 	initSlides( slides ) {
 		let i = 0;
 		slides[0].setAttribute('slot', 'carda');
@@ -264,6 +274,10 @@ export class WijitCarousel extends HTMLElement {
 
 	/**
 	 * Creates the controls for the carousel if user did not include them.
+	 * @returns {NodeList} The created controls
+	 *
+	 * @test self.slides = [document.createElement('img')];
+	 		self.createControls instanceof NodeList // true
 	 */
 	createControls() {
 		const frag = new DocumentFragment();
@@ -286,7 +300,11 @@ export class WijitCarousel extends HTMLElement {
 	}
 
 	/**
-	 * Initializes the carousel controls if user supplies them
+	 * Initializes the carousel controls
+	 * @param {NodeList} controls - The node list of carousel controls
+	 * @returns {NodeList}				- The controls
+	 *
+	 * @test self.controls // 'foo';
 	 */
 	initControls( controls ) {
 		let i = 0;
@@ -309,7 +327,7 @@ export class WijitCarousel extends HTMLElement {
 	/**
 	 * Transitions the carousel to the next slide.
 	 *
-	 * @param {Event} event The click event that triggered the transition.
+	 * @param {Event} event - The click event that triggered the transition.
 	 */
 	transition( event ) {
 		const panel = this.shadowRoot.querySelector( '#panel' );
@@ -366,6 +384,13 @@ export class WijitCarousel extends HTMLElement {
 			}
 			panel.append (nextCard);
 			this.enableControls();
+
+			if (this.autoplay) {
+				const pause = this.pause * 1000;
+				setTimeout( () => {
+					this.play(this.iteration++);
+				}, pause);
+			}
 		}, { signal:abortcontroller.signal } );
 
 		this.disableControls();
@@ -383,32 +408,11 @@ export class WijitCarousel extends HTMLElement {
 		}
 	}
 
-	/**
-	 * Start AutpPlay to automatically advance the slides
-	 */
-	startAuto() {
-		let delay = ( this.pause * 1000 ) + ( this.speed * 1000 );
-		if ( this.pause <= 0 ) delay = 0;
-		this.autoPlay(this.iteration++);
-		this.autoInterval = setInterval (() => {
-			this.autoPlay(this.iteration++);
-		}, delay);
-	}
-
-	/**
-	 * Stop AutoPlay
-	 * @return {[type]} [description]
-	 */
-	stopAuto() {
-		clearInterval(this.autoInterval);
-	}
-
-	autoPlay( iteration = this.iteration ) {
+	play( iteration = this.iteration ) {
 		const count = this.slides.length * this.repeat;
 		const idx = iteration % this.carouselControls.length;
 		this.carouselControls[idx].click();
 		if (count !== 0 && iteration >= count) {
-			this.stopAuto();
 			this.iteration = 1;
 			return;
 		}
@@ -420,13 +424,13 @@ export class WijitCarousel extends HTMLElement {
 		case 'false':
 		case false:
 			value = false;
-			this.stopAuto();
+			this.iteration = 1;
 			break;
 		default:
 			value = true;
-			this.startAuto();
+			this.play(this.iteration++);
+			break;
 		}
-
 		this.#autoplay = value;
 	}
 
@@ -451,14 +455,13 @@ export class WijitCarousel extends HTMLElement {
 	get pause () { return this.#pause; }
 	set pause ( value ) {
 		value = parseFloat( value );
-		if ( value <= 0 ) {
-			this.style.setProperty('--transition-timing', 'ease-in-out');
+		if (isNaN( value) ) value = 0;
+		if (value < 0) value = 0;
+		if ( value === 0 ) {
+			this.style.setProperty('--transition-timing', 'linear');
 		}
 		this.#pause = value;
-		if ( this.autoplay ) {
-			this.stopAuto();
-			this.startAuto();
-		}
+
 	}
 
 	get repeat () { return this.#repeat; }
@@ -471,10 +474,6 @@ export class WijitCarousel extends HTMLElement {
 		value = parseFloat( value );
 		this.#speed = value;
 		this.style.setProperty('--speed', `${value}s`);
-		if ( this.autoplay ) {
-			this.stopAuto();
-			this.startAuto();
-		}
 	}
 
 }

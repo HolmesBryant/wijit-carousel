@@ -8,12 +8,17 @@
 
       background: var(--bg1-color);
       color: var(--text-color);
+      display: grid;
       font-family: sans-serif;
       font-size: 16px;
       height: 100%;
       letter-spacing: .1rem;
       line-height: 1.5rem;
       padding: 1rem;
+    }
+
+    wijit-form {
+      --accent-color: lightslategray;
     }
 
     body * { box-sizing: border-box; }
@@ -26,8 +31,10 @@
         --bg3-color: rgb(60, 60, 60);
         --border-color: dimgray;
         --text-color: rgb(240, 240, 240);
+      }
 
-        display: grid;
+      wijit-form {
+        --accent-color: orange;
       }
     }
 

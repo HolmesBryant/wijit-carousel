@@ -27,69 +27,108 @@
  */
 export class WijitCarousel extends HTMLElement {
 	/**
-	 * The attribute name to add to the active control.
+	 * An abort controller attached to all event listeners
+	 * @private
+	 * @type {AbortController}
+	 */
+	#abortcontroller = new AbortController();
+
+	/**
+	 * The attribute name to add to the control which corresponds to the currently visible slide.
 	 * @public
+	 * @type {string}
 	 */
 	activeindicator = 'active';
 
 	/**
+	 * Determines if slideshow is paused when user clicks on a controls or on the slide itself
+	 * @private
+	 * @type {boolean}
+	 * @remarks Has public getter and setter
+	 */
+	#clickauto = true;
+
+	/**
 	 * Whether to make the automatically generated controls visible
 	 * @private
+	 * @type {boolean}
+	 * @remarks Has public getter and setter
 	 */
 	#controls = false;
 
 	/**
 	 * Whether to automatically play the carousel.
 	 * @private
+	 * @type {boolean}
+	 * @remarks Has public getter and setter
 	 */
 	#autoplay = false;
 
 	/**
 	 * The available effects for the carousel.
 	 * @private
+	 * @type {string[]}
 	 */
-	#effects = ['slide', 'fade', 'flip'];
+	#effects = ['fade', 'flip', 'slide', 'slip'];
 
 	/**
 	 * The current effect being used.
 	 * @private
+	 * @type {string}
+	 * @remarks Has public getter and setter
 	 */
 	#effect = 'slide';
 
 	/**
 	 * The pause between slides in seconds.
 	 * @private
+	 * @type {integer|float}
+	 * @remarks Has public getter and setter
 	 */
 	#pause = 3;
 
 	/**
 	 * The number of times to repeat the carousel. 0 means repeat infinitly.
 	 * @private
+	 * @type {integer}
+	 * @remarks Has public getter and setter
 	 */
 	#repeat = 0;
 
 	/**
 	 * The speed of each transition in seconds.
 	 * @private
-	 * @type {float}
+	 * @type {integer|float}
+	 * @remarks Has public getter and setter
 	 */
-	#speed = '1';
+	#speed = 1;
 
-	currentSlot = 'carda';
+	/**
+	 * The slot holding the visible slide
+	 * @private;
+	 * @type {String}
+	 */
+	#currentSlot = 'carda';
 
 	/**
 	 * The current iteration of the carousel. Used for autoPlay
 	 * @private
+	 * @type {integer}
 	 */
-	iteration = 1;
+	#iteration = 1;
 
-	carouselControls = [];
+	/**
+	 * Array holding the controls for the carousel
+	 * @private
+	 * @type {Array}
+	 */
+	#carouselControls = [];
 
 	/**
 	 * An array of attributes to observe for changes.
 	 * @static
 	 */
-	static observedAttributes = ['autoplay', 'controls', 'effect', 'pause', 'repeat', 'speed'];
+	static observedAttributes = ['autoplay', 'clickauto', 'controls', 'effect', 'pause', 'repeat', 'speed'];
 
 	/**
 	 * Constructs a new WijitCarousel instance.
@@ -105,7 +144,7 @@ export class WijitCarousel extends HTMLElement {
 					--perspective: 1800px;
 					--perspective-origin: center;
 					--speed: ${this.speed}s;
-					--transition-timing: ease-out;
+					--transition-timing: ease;
 					display: block;
 				}
 
@@ -250,7 +289,11 @@ export class WijitCarousel extends HTMLElement {
 		let controls = this.querySelectorAll( '*[slot=controls]' );
 		if ( this.slides ) this.initSlides( this.slides );
 		if ( controls.length === 0 ) controls = this.createControls();
-		this.carouselControls = this.initControls( controls );
+		this.#carouselControls = this.initControls( controls );
+	}
+
+	disconnectedCallback() {
+		this.#abortcontroller.abort();
 	}
 
 	/**
@@ -267,7 +310,24 @@ export class WijitCarousel extends HTMLElement {
 
 		for ( i; i < slides.length; i++ ) {
 			slides[i].setAttribute( 'data-slide', i);
+
+			if ( this.clickauto ) {
+				slides[i].addEventListener( 'click' , event => {
+					if (
+						event.target.localName == 'input'
+						|| event.target.localName == 'select'
+						|| event.target.localName == 'textarea'
+					) {
+						this.autoplay = false;
+					} else {
+						this.autoplay = !this.autoplay;
+						if (this.autoplay) this.play(this.#iteration++)
+					}
+
+				}, { signal:this.#abortcontroller.signal } );
+			}
 		}
+
 
 		return slides;
 	}
@@ -318,7 +378,7 @@ export class WijitCarousel extends HTMLElement {
 					control.removeAttribute( this.activeindicator );
 					event.target.setAttribute( this.activeindicator, 'true' );
 				}
-			});
+			}, { signal:this.#abortcontroller.signal } );
 		}
 
 		return controls;
@@ -332,18 +392,18 @@ export class WijitCarousel extends HTMLElement {
 	transition( event ) {
 		const panel = this.shadowRoot.querySelector( '#panel' );
 		const target = event.target.getAttribute( 'data-target' );
-		const currentSlide = this.querySelector( `[slot='${this.currentSlot}']` );
+		const currentSlide = this.querySelector( `[slot='${this.#currentSlot}']` );
 		const targetSlide = this.querySelector( `[data-slide='${target}']` );
-		const nextSlot = ( this.currentSlot === 'carda' ) ? 'cardb' : 'carda';
+		const nextSlot = ( this.#currentSlot === 'carda' ) ? 'cardb' : 'carda';
 		if ( currentSlide === targetSlide ) return;
 
 		targetSlide.setAttribute( 'slot', nextSlot);
-		this.currentSlot = nextSlot;
+		this.#currentSlot = nextSlot;
 
 		switch (this.effect) {
 		case 'slip':
 			// effect breaks if 'which' is moved to top of function
-			const whichSlip = (this.currentSlot === 'carda') ? 'a' : 'b';
+			const whichSlip = (this.#currentSlot === 'carda') ? 'a' : 'b';
 			panel.classList.add(whichSlip);
 			panel.classList.add( 'slip-left' );
 			this.endEffect( targetSlide, ['slip-left', whichSlip]);
@@ -354,7 +414,7 @@ export class WijitCarousel extends HTMLElement {
 			break;
 		case 'flip':
 			// effect breaks if 'which' is moved to top of function
-			const whichFlip = (this.currentSlot === 'carda') ? 'b' : 'a';
+			const whichFlip = (this.#currentSlot === 'carda') ? 'b' : 'a';
 			panel.classList.add('flipped');
 			panel.classList.add(whichFlip);
 			setTimeout( () => { panel.classList.add('flip') }, 5 );
@@ -375,7 +435,7 @@ export class WijitCarousel extends HTMLElement {
 			abortcontroller.abort();
 			abortcontroller = null;
 
-			const nextSlot = ( this.currentSlot === 'carda') ? 'cardb' : 'carda';
+			const nextSlot = ( this.#currentSlot === 'carda') ? 'cardb' : 'carda';
 			const nextSlide = this.querySelector(`[slot=${nextSlot}]`);
 			const nextCard = panel.querySelector(`#${nextSlot}`);
 			nextSlide.removeAttribute( 'slot' );
@@ -388,7 +448,7 @@ export class WijitCarousel extends HTMLElement {
 			if (this.autoplay) {
 				const pause = this.pause * 1000;
 				setTimeout( () => {
-					this.play(this.iteration++);
+					this.play(this.#iteration++);
 				}, pause);
 			}
 		}, { signal:abortcontroller.signal } );
@@ -396,26 +456,33 @@ export class WijitCarousel extends HTMLElement {
 		this.disableControls();
 	}
 
-	disableControls( controls = this.carouselControls ) {
+	disableControls( controls = this.#carouselControls ) {
 		for ( const control of controls ) {
 			control.disabled = true;
 		}
 	}
 
-	enableControls( controls = this.carouselControls ) {
+	enableControls( controls = this.#carouselControls ) {
 		for ( const control of controls ) {
 			control.disabled = false;
 		}
 	}
 
-	play( iteration = this.iteration ) {
+	play( iteration = this.#iteration ) {
+		if (!this.autoplay) return;
 		const count = this.slides.length * this.repeat;
-		const idx = iteration % this.carouselControls.length;
-		this.carouselControls[idx].click();
+		const idx = iteration % this.#carouselControls.length;
+		this.#carouselControls[idx].click();
 		if (count !== 0 && iteration >= count) {
-			this.iteration = 1;
-			return;
+			this.autoplay = false;
+			this.#iteration = 1;
 		}
+	}
+
+	fireEvent(property, value) {
+		const details = { property:property, value:value };
+		const evt = new CustomEvent(this.localName, { detail: details });
+		document.dispatchEvent(evt);
 	}
 
 	get autoplay () { return this.#autoplay; }
@@ -424,18 +491,19 @@ export class WijitCarousel extends HTMLElement {
 		case 'false':
 		case false:
 			value = false;
-			this.iteration = 1;
+			this.#iteration = 1;
 			break;
 		default:
 			value = true;
-			this.play(this.iteration++);
+			this.play(this.#iteration++);
 			break;
 		}
 		this.#autoplay = value;
+		this.fireEvent('autoplay', value);
 	}
 
-	get controls () { return this.#controls; }
-	set controls ( value ) {
+	get clickauto() { return this.#clickauto; }
+	set clickauto( value ) {
 		switch ( value ) {
 		case 'false':
 		case false:
@@ -443,30 +511,49 @@ export class WijitCarousel extends HTMLElement {
 			break;
 		default:
 			value = true;
+			break;
 		}
+
+		this.#clickauto = value;
+		this.fireEvent( 'clickauto', value );
+	}
+
+	get controls () { return this.#controls; }
+	set controls ( value ) {
+		const elem = this.shadowRoot.querySelector( '#controls' );
+		switch ( value ) {
+		case 'false':
+		case false:
+			value = false;
+			elem.setAttribute( 'hidden', 'true' );
+			break;
+		default:
+			value = true;
+			elem.removeAttribute( 'hidden' );
+		}
+
 		this.#controls = value;
+		this.fireEvent( 'controls', value );
 	}
 
 	get effect () { return this.#effect; }
 	set effect ( value ) {
 		this.#effect = value;
+		this.fireEvent( 'effect', value );
 	}
 
 	get pause () { return this.#pause; }
 	set pause ( value ) {
 		value = parseFloat( value );
-		if (isNaN( value) ) value = 0;
-		if (value < 0) value = 0;
-		if ( value === 0 ) {
-			this.style.setProperty('--transition-timing', 'linear');
-		}
+		if ( isNaN( value ) || value < 0 ) value = 0;
 		this.#pause = value;
-
+		this.fireEvent( 'pause', value );
 	}
 
 	get repeat () { return this.#repeat; }
 	set repeat ( value ) {
 		this.#repeat = value;
+		this.fireEvent( 'repeat', value );
 	}
 
 	get speed() { return this.#speed; }
@@ -474,6 +561,7 @@ export class WijitCarousel extends HTMLElement {
 		value = parseFloat( value );
 		this.#speed = value;
 		this.style.setProperty('--speed', `${value}s`);
+		this.fireEvent('speed', value);
 	}
 
 }

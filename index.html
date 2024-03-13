@@ -6,16 +6,12 @@
   <meta name="viewport" content="width=device-width">
   <title>Carousel Web Component</title>
   <script type="module" src="src/wijit-carousel.js"></script>
-  <!-- <script type="module" src="dist/wijit-carousel.min.js"></script> -->
   <script type="module" src="extra/wijit-form.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
-    wijit-form {
-      --accent-color: orange;
-    }
-
-    wijit-carousel {
-      border: 1pc solid transparent;
+    wijit-carousel::part(panel) {
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
     }
 
     wijit-carousel > img {
@@ -73,6 +69,7 @@
 
   <section id="demo">
     <wijit-form data-with="#my-carousel">
+      <form action="false">
       <section class="row">
         <section>
           <div>
@@ -94,6 +91,11 @@
             </label>
             <input id="demo-speed" type="range" min=".5" max="5" value="1" step=".5" oninput="change(event, 'speed')">
           </div>
+
+          <div class="row reverse">
+            <label for="demo-controls">controls</label>
+            <input checked type="checkbox" id="demo-controls" onchange="change(event, 'controls')">
+          </div>
         </section>
 
         <fieldset>
@@ -106,7 +108,7 @@
 
           <div>
             <label for="demo-repeat">repeat (default: 0)</label>
-            <input id="demo-repeat" type="number" value="0" oninput="change(event, 'repeat')">
+            <input id="demo-repeat" type="number" value="0" step="1" oninput="change(event, 'repeat')">
           </div>
 
           <div>
@@ -149,6 +151,7 @@
               <option>steps(10, start)</option>
               <option>steps(500, jump-both)</option>
             </select>
+          </div>
 
           <div>
             <label for="demo-panelheight">--panel-height</label>
@@ -164,7 +167,7 @@
             <label for="demo-perspective" class="flex">
               <span>--perspective</span>
               <span>&nbsp;(flip only)</span>
-          </label>
+            </label>
             <select id="demo-perspective" onchange="change(event, '--perspective')">
               <option value="1800px">1800px (default)</option>
               <option>none</option>
@@ -188,13 +191,14 @@
           </div>
         </fieldset>
       </section>
+      </form>
     </wijit-form>
 
     <wijit-carousel id="demo-carousel" controls>
       <figure style="display:grid; grid-template-columns: 200px 200px">
         <img alt="astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
         <figcaption style="mix-blend-mode:difference; text-align:left">
-          <h3>Image of Astronaut</h3>
+          <h3>An Astronaut!!</h3>
           <p>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></p>
         </figcaption>
       </figure>
@@ -222,18 +226,24 @@
         <img style="width:100%; object-fit:cover" src="https://images-assets.nasa.gov/image/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
 
       <figure class="flex row">
-        <img style="flex:1" src="https://eoimages.gsfc.nasa.gov/images/imagerecords/152000/152531/iss069e092132_front.jpg">
+        <img style="flex:0 1 400px; max-width:600px" src="https://www.nasa.gov/wp-content/uploads/2024/03/iss070e064628orig.jpg">
         <figcaption style="flex:1 1 150px">
-          <p>An image of Earth from space.</p>
+          <p>NASA Astronauts Jasmin Moghbeli and Loral O’Hara Read NASA's first graphic novel, "First Woman".</p>
           <small>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></small>
         </figcaption>
       </figure>
-
     </wijit-carousel>
   </section>
 
   <script>
+    let time = Date.now();
+    /**
+     * Change various properties and css variables relating the the web component.
+     * @param  {Event} evt  Usually a change or input event
+     * @param  {string} attr The name of the attribute/property or css variable
+     */
     function change(evt, attr) {
+      const delay = 500;
       const el = document.querySelector('#demo-carousel');
 
       if ( attr.startsWith( '--' ) ) {
@@ -245,22 +255,29 @@
           el.setAttribute( attr, value );
           break;
 
+        case 'controls':
+          value = evt.target.checked ? 'true' : 'false';
+          el.setAttribute( attr, value );
+          break;
+
         case 'speed':
           value = evt.target.value;
-          const speedInfo = document.querySelector('#speed-info');
-          speedInfo.textContent = value;
-          setTimeout( () => {
-            el.setAttribute( attr, value );
-          }, 100);
+          if ( Date.now() - time < delay) {
+            break;
+          };
+
+          el.setAttribute( attr, value );
+          time = Date.now();
           break;
 
         case 'pause':
           value = event.target.value;
-          const pauseInfo = document.querySelector('#pause-info');
-          pauseInfo.textContent = value;
-          setTimeout( () => {
-            el.setAttribute( attr, value );
-          }, 100)
+          if ( Date.now() - time < delay) {
+            break;
+          };
+
+          el.setAttribute( attr, value );
+          time = Date.now();
           break;
 
         default:
@@ -268,7 +285,6 @@
           el.setAttribute( attr, value );
           break;
         }
-
       }
     }
 
@@ -283,6 +299,26 @@
         elem.textContent = text;
       });
     }
+
+    document.addEventListener( 'wijit-carousel', event => {
+      switch (event.detail.property) {
+      case 'autoplay':
+        const elem = document.querySelector('#demo-autoplay');
+        elem.checked = event.detail.value;
+        break;
+      case 'speed':
+        const speedInfo = document.querySelector('#speed-info');
+          speedInfo.textContent = value;
+          break;
+      case 'pause':
+          const pauseInfo = document.querySelector('#pause-info');
+          pauseInfo.textContent = value;
+          break;
+      default:
+        // console.log(event.detail.property, event.detail.value)
+        break;
+      }
+    });
 
     getReadme();
   </script>

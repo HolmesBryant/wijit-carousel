@@ -33,6 +33,8 @@ export class WijitCarousel extends HTMLElement {
 	 */
 	#abortcontroller = new AbortController();
 
+	#clickAutoAbortcontroller;
+
 	/**
 	 * The attribute name to add to the control which corresponds to the currently visible slide.
 	 * @public
@@ -46,7 +48,7 @@ export class WijitCarousel extends HTMLElement {
 	 * @type {boolean}
 	 * @remarks Has public getter and setter
 	 */
-	#clickauto = true;
+	#clickplay = false;
 
 	/**
 	 * Whether to make the automatically generated controls visible
@@ -115,7 +117,7 @@ export class WijitCarousel extends HTMLElement {
 	 * @private
 	 * @type {integer}
 	 */
-	#iteration = 1;
+	#slideNum = 1;
 
 	/**
 	 * Array holding the controls for the carousel
@@ -128,7 +130,7 @@ export class WijitCarousel extends HTMLElement {
 	 * An array of attributes to observe for changes.
 	 * @static
 	 */
-	static observedAttributes = ['autoplay', 'clickauto', 'controls', 'effect', 'pause', 'repeat', 'speed'];
+	static observedAttributes = ['autoplay', 'clickplay', 'controls', 'effect', 'pause', 'repeat', 'speed'];
 
 	/**
 	 * Constructs a new WijitCarousel instance.
@@ -139,8 +141,10 @@ export class WijitCarousel extends HTMLElement {
 		this.shadowRoot.innerHTML = `
 			<style>
 				:host {
+					--container-height: 100%;
+					--control-height: 50px;
 					--overflow: hidden;
-					--panel-height: 300px;
+					--panel-height: auto;
 					--perspective: 1800px;
 					--perspective-origin: center;
 					--speed: ${this.speed}s;
@@ -150,6 +154,13 @@ export class WijitCarousel extends HTMLElement {
 
 				.hidden {
 					display: none;
+				}
+
+				#container {
+					display: grid;
+					grid-template-rows: 1fr var(--control-height);
+					height: var(--container-height);
+					transition: all .5s;
 				}
 
 				#panel {
@@ -310,26 +321,26 @@ export class WijitCarousel extends HTMLElement {
 
 		for ( i; i < slides.length; i++ ) {
 			slides[i].setAttribute( 'data-slide', i);
-
-			if ( this.clickauto ) {
-				slides[i].addEventListener( 'click' , event => {
-					if (
-						event.target.localName == 'input'
-						|| event.target.localName == 'select'
-						|| event.target.localName == 'textarea'
-					) {
-						this.autoplay = false;
-					} else {
-						this.autoplay = !this.autoplay;
-						if (this.autoplay) this.play(this.#iteration++)
-					}
-
-				}, { signal:this.#abortcontroller.signal } );
-			}
+			if ( this.clickplay ) this.addClickAutoListener( slides[i] );
 		}
 
-
 		return slides;
+	}
+
+	addClickAutoListener( slide ) {
+		slide.addEventListener( 'click' , event => {
+			if (
+				event.target.localName == 'input'
+				|| event.target.localName == 'select'
+				|| event.target.localName == 'textarea'
+				|| event.target.localName == 'button'
+			) {
+				this.autoplay = false;
+			} else {
+				this.autoplay = !this.autoplay;
+			}
+
+		}, { signal:this.#clickAutoAbortcontroller.signal } );
 	}
 
 	/**
@@ -448,7 +459,7 @@ export class WijitCarousel extends HTMLElement {
 			if (this.autoplay) {
 				const pause = this.pause * 1000;
 				setTimeout( () => {
-					this.play(this.#iteration++);
+					this.play();
 				}, pause);
 			}
 		}, { signal:abortcontroller.signal } );
@@ -468,14 +479,16 @@ export class WijitCarousel extends HTMLElement {
 		}
 	}
 
-	play( iteration = this.#iteration ) {
+	play( iteration = this.#slideNum ) {
 		if (!this.autoplay) return;
 		const count = this.slides.length * this.repeat;
 		const idx = iteration % this.#carouselControls.length;
+		console.log(iteration, idx);
 		this.#carouselControls[idx].click();
+		this.#slideNum++;
 		if (count !== 0 && iteration >= count) {
 			this.autoplay = false;
-			this.#iteration = 1;
+			this.#slideNum = 1;
 		}
 	}
 
@@ -490,32 +503,41 @@ export class WijitCarousel extends HTMLElement {
 		switch (value) {
 		case 'false':
 		case false:
-			value = false;
-			this.#iteration = 1;
+			this.#autoplay = false;
 			break;
 		default:
-			value = true;
-			this.play(this.#iteration++);
+			this.#autoplay = true;
+			this.play();
 			break;
 		}
-		this.#autoplay = value;
+
 		this.fireEvent('autoplay', value);
 	}
 
-	get clickauto() { return this.#clickauto; }
-	set clickauto( value ) {
+	get clickplay() { return this.#clickplay; }
+	set clickplay( value ) {
 		switch ( value ) {
 		case 'false':
 		case false:
 			value = false;
+			this.removeAttribute('clickable');
+			this.#clickAutoAbortcontroller.abort();
 			break;
 		default:
 			value = true;
+			this.#clickAutoAbortcontroller = new AbortController();
+			if (this.slides) {
+				this.setAttribute('clickable', 'true');
+				for ( const slide of this.slides ) {
+					this.addClickAutoListener(slide);
+				}
+			}
+
 			break;
 		}
 
-		this.#clickauto = value;
-		this.fireEvent( 'clickauto', value );
+		this.#clickplay = value;
+		this.fireEvent( 'clickplay', value );
 	}
 
 	get controls () { return this.#controls; }

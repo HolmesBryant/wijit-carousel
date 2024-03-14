@@ -10,11 +10,12 @@ Demo: [https://holmesbryant.github.io/wijit-carousel/](https://holmesbryant.gith
     - Complete rewrite
     - Changed the default effect from "fade" to "slide".
     - Changed the observed attribute "autocontrols" to "controls".
+    - Added observered attribute "clickplay" which enables the user to click on a slide to play/pause the slideshow.
     - Changed the observed attribute "auto" to "autoplay".
     - Removed "activeclass" from list of observed attributes.
     - The active control (if controls are present) now has the attribute "active". In CSS, you can target it with element[active] { ... }.
     - Added "slip" to list of effects.
-    - Exposed CSS variables "--overflow", "--transition-timing", "--panel-height", "--perspective", "--perspective-origin".
+    - Exposed CSS variables "--overflow", "--transition-timing", "--container-height", "--perspective", "--perspective-origin". These must be applied to the wijit-carousel element, not :root or body.
 
 ## Usage
 
@@ -63,9 +64,9 @@ Demo: [https://holmesbryant.github.io/wijit-carousel/](https://holmesbryant.gith
     - **pause** ( default:3 )
         - Acceptable values: [any integer or float]
         - Number of seconds to pause between transitions. Values approaching "0" may produce unexpected behavior in some cases.
-    - **clickauto** ( default:true )
+    - **clickplay** ( default:false )
     - Acceptable values [" ", "false", truthy values]
-    - Any value except "false" is "true". This attribute determines if the carousel auto-plays/pauses when the user clicks on a slide. If autoplay is currently active, a click will pause the slide show. If it is currently inactive, a click will start (or restart) the slide show. A second click will reverse the effect of the first click. Any clicks inside of form elements (slides can include form elements) will only stop the slide show. The user must click somewhere in the slide - not in a form element - in order to restart the slide show.
+    - Any value except "false" is "true". This attribute determines if the carousel auto-plays/pauses when the user clicks on a slide. If autoplay is currently active, a click will pause the slide show. If it is currently inactive, a click will start (or resume) the slide show.  Any clicks on form elements or buttons (slides can include forms) will only stop the slide show. The user must then click somewhere in the slide - not on a form element - in order to restart the slide show.
 
 ## CSS Variables
 
@@ -88,9 +89,9 @@ These css variables affect the appearance and/or behavior of the component. You 
 * **--transition-timing** ( default:ease )
     - Acceptable values: [Any value that works with the css transition-timing-function]
     - Determines how the timing between slide transitions is interpolated. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function" target="_blank">CSS transition-timing-function</a>
-* **--panel-height** ( default:300px )
+* **--container-height** ( default:100% )
     - Acceptable values: [Any valid css length value]
-    - Determines the height of the panel which holds the slides, which in turn determines how much of the slide content is visible. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/height" target="_blank">CSS height</a>
+    - Determines the height of the container which holds the slides and controls, which in turn determines how much of the slide content is visible. Depending on the layout of the page, the desired height of the container may be different than the height of the wijit-carousel element. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/height" target="_blank">CSS height</a>
 * **--perspective** ( default:1800px )
     - Acceptable values: [Any css length value]
     - **Only applies to the "flip" effect.** Determines the intensity of the flipping effect. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/perspective" target="_blank">CSS perspective</a>

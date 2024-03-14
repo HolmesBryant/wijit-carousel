@@ -104,14 +104,11 @@
       }
 
       details
-      {
-        overflow-y: auto;
-      }
+      { overflow-y: auto; }
 
       details[open]
       {
         height: 80vh;
-        padding: 1rem;
         white-space: pre-wrap;
       }
 
@@ -126,7 +123,8 @@
       header
       {
         flex: 0;
-        padding: 0 1rem;
+        margin-bottom: 1rem;
+/*        padding: 0 1rem;*/
       }
 
       li
@@ -137,15 +135,10 @@
 
       section#demo {
         display: grid;
+        gap: 10px;
         grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
-      }
-
-      section#demo:first-child {
-        flex: 1;
-      }
-
-      section#demo:last-child {
-        flex: 1;
+        grid-auto-rows: 500px;
+        margin-top: 1rem;
       }
 
       section#examples {
@@ -213,6 +206,11 @@
         position: sticky;
         top: 0;
         z-index: 10;
+      }
+
+      #instructions {
+        padding: 1rem;
+        font-size: 1rem;
       }
 
       #readme {

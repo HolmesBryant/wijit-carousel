@@ -9,12 +9,16 @@
   <script type="module" src="extra/wijit-form.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
+    wijit-carousel[clickable] {
+      cursor: pointer;
+    }
+
     wijit-carousel::part(panel) {
       border: 1px solid var(--border-color);
       border-radius: 1rem;
     }
 
-    wijit-carousel > img {
+    wijit-carousel > * {
       height: 100%;
     }
 
@@ -60,8 +64,11 @@
 </head>
 
 <body>
-  <h1>Wijit-Carousel web component</h1>
-  <strong>Creates a carousel with a variety of effects</strong>
+  <header>
+    <h1>Wijit-Carousel web component</h1>
+    <strong>Creates a carousel with a variety of effects</strong>
+  </header>
+
   <details>
     <summary>Instructions</summary>
     <div id="instructions"> </div>
@@ -102,6 +109,11 @@
         <legend>Autoplay Options</legend>
 
           <div class="row reverse start">
+            <label for="demo-clickplay">clickplay</label>
+            <input id="demo-clickplay" type="checkbox" value="true" onchange="change(event,'clickplay')">
+          </div>
+
+          <div class="row reverse start">
             <label for="demo-autoplay">autoplay</label>
             <input id="demo-autoplay" type="checkbox" value="true" onchange="change(event,'autoplay')">
           </div>
@@ -133,9 +145,7 @@
             <label for="demo-overflow">--overflow</label>
             <select id="demo-overflow" onchange="change(event, '--overflow')">
               <option value="hidden">hidden (default)</option>
-              <option>visible</option>
               <option>auto</option>
-              <option>scroll</option>
             </select>
           </div>
 
@@ -154,12 +164,13 @@
           </div>
 
           <div>
-            <label for="demo-panelheight">--panel-height</label>
-            <select id="demo-panelheight" onchange="change(event, '--panel-height')">
-              <option value="300px">300px (default)</option>
-              <option>100px</option>
+            <label for="demo-containerheight">--container-height</label>
+            <select id="demo-containerheight" onchange="change(event, '--container-height')">
+              <option value="100%">100% (default)</option>
+              <option>auto</option>
+              <option>300px</option>
               <option>800px</option>
-              <option>10rem</option>
+              <option>20rem</option>
             </select>
           </div>
 
@@ -195,15 +206,16 @@
     </wijit-form>
 
     <wijit-carousel id="demo-carousel" controls>
-      <figure style="display:grid; grid-template-columns: 200px 200px">
+      <figure style="display:grid; grid-template-columns: 50px 200px">
         <img alt="astronaut" src="https://images-assets.nasa.gov/image/iss035e036990/iss035e036990~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
         <figcaption style="mix-blend-mode:difference; text-align:left">
-          <h3>An Astronaut!!</h3>
-          <p>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></p>
+          <h1>Expedition 35</h1>
+          <p>Flight Engineer Chris Cassidy replaces a pump controller box on the International Space Station.</p>
+          <small>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></small>
         </figcaption>
       </figure>
 
-      <div class="flex row" style="height:100%">
+      <div class="flex row">
         <wijit-form class="one">
           <section>
             <div class="row">
@@ -223,15 +235,17 @@
         </div>
       </div>
 
-        <img style="width:100%; object-fit:cover" src="https://images-assets.nasa.gov/image/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
-
       <figure class="flex row">
-        <img style="flex:0 1 400px; max-width:600px" src="https://www.nasa.gov/wp-content/uploads/2024/03/iss070e064628orig.jpg">
+        <img style="max-width:75%" src="https://images-assets.nasa.gov/image/carina_nebula/carina_nebula~medium.jpg">
         <figcaption style="flex:1 1 150px">
-          <p>NASA Astronauts Jasmin Moghbeli and Loral O’Hara Read NASA's first graphic novel, "First Woman".</p>
-          <small>Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a></small>
+          <p>James Webb Space Telescope NIRCam Image of the “Cosmic Cliffs” in Carina Nebula.</p>
+          <small>
+            Image courtesy of <a href="https://www.nasa.gov/images/" target="_blank">NASA Image Gallery</a>
+          </small>
         </figcaption>
       </figure>
+
+      <img style="width:100%; object-fit:cover" src="https://images-assets.nasa.gov/image/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o/hubble-observes-one-of-a-kind-star-nicknamed-nasty_17754652960_o~medium.jpg" title="Image courtesy of NASA Image Gallery ( nasa.gov/images )" alt="Image courtesy of NASA Image Gallery ( nasa.gov/images )">
     </wijit-carousel>
   </section>
 
@@ -243,7 +257,7 @@
      * @param  {string} attr The name of the attribute/property or css variable
      */
     function change(evt, attr) {
-      const delay = 500;
+      const delay = 100;
       const el = document.querySelector('#demo-carousel');
 
       if ( attr.startsWith( '--' ) ) {
@@ -272,12 +286,7 @@
 
         case 'pause':
           value = event.target.value;
-          if ( Date.now() - time < delay) {
-            break;
-          };
-
           el.setAttribute( attr, value );
-          time = Date.now();
           break;
 
         default:
@@ -304,7 +313,7 @@
       switch (event.detail.property) {
       case 'autoplay':
         const elem = document.querySelector('#demo-autoplay');
-        elem.checked = event.detail.value;
+        elem.checked = ( event.detail.value === 'false') ? false : true;
         break;
       case 'speed':
         const speedInfo = document.querySelector('#speed-info');

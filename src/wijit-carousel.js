@@ -1,28 +1,28 @@
 /**
  * A web component that creates a carousel with a variety of effects.
- * Include equal number of panels and controls.
+ * Include equal number of slides and (optional) controls.
  * Controls must have attribute slot='controls'.
- * The first control activates the first panel, ect.
- * Controls are optional. You don't have to include them if you don't want them.
- * The panels can also be swiped on touch devices.
+ * The first control activates the first slide, ect.
  *
  * @author Holmes Bryant <https://github.com/HolmesBryant>
  * @license GPL-3.0
  *
- * @property {string} effect - The effect to use for the carousel. Valid values are "slide", "fade", and "flip".
- * @property {boolean} auto - Whether to automatically play the carousel.
- * @property {number} repeat - The number of times to repeat the carousel.
- * @property {number} speed - The speed of the carousel in seconds.
- * @property {number} pause - The pause between slides in seconds.
+ * @property {boolean} 	autoplay 	- Whether to automatically play the carousel.
+ * @property {boolean} 	clickplay 	- Whether to allow user to click on a slide to play/pause slideshow.
+ * @property {boolean} 	controls 		- Whether to automatically generate clickable controls for the carousel.
+ * @property {number} 	pause 			- The pause between slides in seconds.
+ * @property {string} 	effect 		- The effect to use for the carousel. Valid values are "slide", "fade", and "flip".
+ * @property {number} 	repeat 			- The number of times to repeat the carousel.
+ * @property {number} 	speed 			- The speed of the carousel in seconds.
  *
- *	@example:
+ * @example:
  *	<wijit-carousel>
  *	    <div>Panel One</div>
  *	    <img src="Panel_Two.jpg">
  *
  * 			<!-- optional -->
- *	    <input slot="controls" type="radio" name="carousel">
- *	    <input slot="controls" type="radio" name="carousel">
+ *	    <button slot="controls">Slide One</button>
+ *	    <button slot="controls">Slide Two</button>
  *	</wijit-carousel>
  */
 export class WijitCarousel extends HTMLElement {
@@ -125,6 +125,8 @@ export class WijitCarousel extends HTMLElement {
 	 * @type {Array}
 	 */
 	#carouselControls = [];
+
+	firstload = true;
 
 	/**
 	 * An array of attributes to observe for changes.
@@ -277,7 +279,7 @@ export class WijitCarousel extends HTMLElement {
 					<slot name="controls"></slot>
 				</div>
 			</div>
-			<div hidden id="slides" class="hidden"><slot></slot></div>
+			<div hidden id="slides" class="hidden"><slot id="default-slot"></slot></div>
 			`;
 	}
 
@@ -294,8 +296,22 @@ export class WijitCarousel extends HTMLElement {
 
 	/**
 	 * Called after the custom element is inserted into the document.
+	 * @remarks If you want to dynamicallye change the slides, you must first set firstload to false in order to initiate the new slide(s).
 	 */
 	connectedCallback() {
+		const slot = this.shadowRoot.querySelector('#default-slot');
+		slot.addEventListener( 'slotchange', event => {
+			if ( !this.firstload ) return;
+			this.init();
+			this.firstload = false;
+		});
+	}
+
+	disconnectedCallback() {
+		this.#abortcontroller.abort();
+	}
+
+	init() {
 		this.slides = Array.from( this.children ).filter( current => !current.hasAttribute( 'slot' ) );
 		let controls = this.querySelectorAll( '*[slot=controls]' );
 		if ( this.slides ) this.initSlides( this.slides );
@@ -303,17 +319,16 @@ export class WijitCarousel extends HTMLElement {
 		this.#carouselControls = this.initControls( controls );
 	}
 
-	disconnectedCallback() {
-		this.#abortcontroller.abort();
-	}
-
 	/**
 	 * Initialize slides.
 	 * @param  {array} slides - Array of HTML elements
 	 * @return {array}        - The array of slides with 'data-slide' set
 	 *
-	 * @test const slides = [document.createElement('img')];
-	 		self.initSlides(slides).length === 1 // true
+	 * @test
+	 		self.slides = [document.createElement('img')];
+	 		return self.initSlides(self.slides).length === 1 // true
+	 *
+	 * @test noreset self.slides[0].hasAttribute('data-slide') // true;
 	 */
 	initSlides( slides ) {
 		let i = 0;
@@ -327,6 +342,10 @@ export class WijitCarousel extends HTMLElement {
 		return slides;
 	}
 
+	/**
+	 * Adds event listener which allows user to click on a slide to play/pause slideshow
+	 * @param {HTMLElement} slide The element to add a listener to.
+	 */
 	addClickAutoListener( slide ) {
 		slide.addEventListener( 'click' , event => {
 			if (
@@ -348,7 +367,8 @@ export class WijitCarousel extends HTMLElement {
 	 * @returns {NodeList} The created controls
 	 *
 	 * @test self.slides = [document.createElement('img')];
-	 		self.createControls instanceof NodeList // true
+	 		self.ctrls = self.createControls();
+	 		return self.ctrls instanceof NodeList // true
 	 */
 	createControls() {
 		const frag = new DocumentFragment();
@@ -375,9 +395,9 @@ export class WijitCarousel extends HTMLElement {
 	 * @param {NodeList} controls - The node list of carousel controls
 	 * @returns {NodeList}				- The controls
 	 *
-	 * @test self.controls // 'foo';
+	 * @test noreset self.ctrls.length // 1;
 	 */
-	initControls( controls ) {
+	initControls( controls = this.controls ) {
 		let i = 0;
 		controls[0].setAttribute( this.activeindicator, 'true' );
 

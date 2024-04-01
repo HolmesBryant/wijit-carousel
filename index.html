@@ -5,7 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>Carousel Web Component</title>
-  <script type="module" src="src/wijit-carousel.js"></script>
+  <script type="module" src="dist/wijit-carousel.min.js"></script>
+  <!-- <script type="module" src="src/wijit-carousel.js"></script> -->
   <script type="module" src="extra/wijit-form.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -59,6 +60,10 @@
       width: 100%;
       align-items: center;
       justify-content: center;
+    }
+
+    wijit-form #css-vars label {
+      font-size: .9rem;
     }
   </style>
 </head>
@@ -138,8 +143,17 @@
           </div>
         </fieldset>
 
-        <fieldset>
+        <fieldset id="css-vars">
         <legend>CSS variables</legend>
+          <div>
+            <label for="demo-orientation">--orientation</label>
+            <select id="demo-orientation" onchange="change(event, '--orientation')">
+              <option value="column">column (default)</option>
+              <option>column-reverse</option>
+              <option>row</option>
+              <option>row-reverse</option>
+            </select>
+          </div>
 
           <div>
             <label for="demo-overflow">--overflow</label>

@@ -16,6 +16,8 @@ Demo: [https://holmesbryant.github.io/wijit-carousel/](https://holmesbryant.gith
     - The active control (if controls are present) now has the attribute "active". In CSS, you can target it with element[active] { ... }.
     - Added "slip" to list of effects.
     - Exposed CSS variables "--overflow", "--transition-timing", "--container-height", "--perspective", "--perspective-origin". These must be applied to the wijit-carousel element, not :root or body.
+- v2.1
+    - Exposed "--orientation" css variable which determines the placement of the controls relative to the slide panel.
 
 ## Usage
 
@@ -52,8 +54,8 @@ Demo: [https://holmesbryant.github.io/wijit-carousel/](https://holmesbryant.gith
     - Acceptable values: [" ", "false", truthy values]
     - Any value except "false" (including an empty string) is "true". If this attribute is present, the component will include automatically generated controls at the bottom of the slide panel. These are basic radio inputs. They are inserted into the light DOM, so you can style them however you want. If you include this attribute, do not add your own controls.
 * **speed** ( default:1 )
-    - Acceptable values: [any integer or float]
-    - How fast the transition happens, in seconds. Lower values result in faster transitions.
+    - Acceptable values: [any integer or float except 0]
+    - How fast the transition happens, in seconds. Lower values result in faster transitions. Setting this to 0 breaks the component, however, depending on the other settings, you may set this as low as .01.
 * **Autoplay Options**
     - **autoplay** ( default:false )
         - Acceptable values: [" ", "false", truthy values]
@@ -75,6 +77,7 @@ These css variables affect the appearance and/or behavior of the component. You 
     //example
     <style>
       wijit-carousel {
+        --orientation: column;
         --overflow: visible;
         --transition-timing: ease;
         --panel-height: 300px;
@@ -83,19 +86,22 @@ These css variables affect the appearance and/or behavior of the component. You 
       }
     </style>
 
-* **--overflow** ( default:hidden )
-    - Acceptable values: [hidden, visible, auto, scroll, clip]
+* **--orientation** ( default: "column" )
+    - Acceptable values: ["column", "column-reverse", "row", "row-reverse"]
+    - Determines the placement of the controls in relation to the slide panel. The default ("column") places them below the panel. "column-reverse" places them above. "row" places them to the right. "row-reverse" places them to the left.
+* **--overflow** ( default: "hidden" )
+    - Acceptable values: ["hidden", "visible", "auto", "scroll", "clip"]
     - Determines whether the content in the slides is allowed to overflow the container. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/overflow" target="_blank">CSS overflow</a>
-* **--transition-timing** ( default:ease )
+* **--transition-timing** ( default: ease )
     - Acceptable values: [Any value that works with the css transition-timing-function]
     - Determines how the timing between slide transitions is interpolated. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function" target="_blank">CSS transition-timing-function</a>
-* **--container-height** ( default:100% )
+* **--container-height** ( default: 100% )
     - Acceptable values: [Any valid css length value]
     - Determines the height of the container which holds the slides and controls, which in turn determines how much of the slide content is visible. Depending on the layout of the page, the desired height of the container may be different than the height of the wijit-carousel element. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/height" target="_blank">CSS height</a>
-* **--perspective** ( default:1800px )
+* **--perspective** ( default: "1800px" )
     - Acceptable values: [Any css length value]
     - **Only applies to the "flip" effect.** Determines the intensity of the flipping effect. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/perspective" target="_blank">CSS perspective</a>
-* **--perspective-origin** ( default:center )
+* **--perspective-origin** ( default: "center" )
     - Acceptable values: [center, top, bottom]
     - **Only applies to the "flip" effect.** Affects the apparent perspective from which the flipping effect is viewed. For more information, see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/perspective-origin" target="_blank">CSS perspective-origin</a>
 

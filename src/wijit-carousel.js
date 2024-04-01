@@ -56,7 +56,7 @@ export class WijitCarousel extends HTMLElement {
 	 * @type {boolean}
 	 * @remarks Has public getter and setter
 	 */
-	#controls = false;
+	#controls = true;
 
 	/**
 	 * Whether to automatically play the carousel.
@@ -144,9 +144,10 @@ export class WijitCarousel extends HTMLElement {
 			<style>
 				:host {
 					--container-height: 100%;
-					--control-height: 50px;
+					--control-height: 35px;
+					--orientation: column;
 					--overflow: hidden;
-					--panel-height: auto;
+					--panel-height: 100%;
 					--perspective: 1800px;
 					--perspective-origin: center;
 					--speed: ${this.speed}s;
@@ -158,14 +159,37 @@ export class WijitCarousel extends HTMLElement {
 					display: none;
 				}
 
+				#carda,
+				#cardb {
+					box-sizing: border-box;
+					display: inline-block;
+					height: 100%;
+					left: 0;
+					overflow: var(--overflow);
+					position: relative;
+					vertical-align: top;
+					white-space: wrap;
+					width: 100%;
+				}
+
 				#container {
-					display: grid;
+					box-sizing: border-box;
+					display: flex;
+					flex-direction: var(--orientation);
 					grid-template-rows: 1fr var(--control-height);
 					height: var(--container-height);
 					transition: all .5s;
 				}
 
+				#controls {
+					flex: 0 1 var(--control-height);
+					text-align: center;
+				}
+
 				#panel {
+					display: block;
+					box-sizing: border-box;
+					flex: 1 0;
 					height: var(--panel-height);
 					opacity: 1;
 					overflow: hidden;
@@ -174,7 +198,7 @@ export class WijitCarousel extends HTMLElement {
 					transition: all var(--speed);
 					transition-timing-function: var(--transition-timing);
 					white-space: nowrap;
-					width: 100%;
+					max-width: 97vw;
 					perspective: var(--perspective);
 					perspective-origin: var(--perspective-origin);
 				}
@@ -246,28 +270,6 @@ export class WijitCarousel extends HTMLElement {
 					transition-timing-function: var(--transition-timing);
 					width: 0%;
 				}
-
-				#carda,
-				#cardb {
-					display: inline-block;
-					height: 100%;
-					left: 0;
-					overflow: var(--overflow);
-					position: relative;
-					text-align: center;
-					vertical-align: top;
-					white-space: wrap;
-					width: 100%;
-				}
-
-				#controls {
-					text-align: center;
-				}
-
-				/* Touch devices */
-				/*@media (hover: none) {
-					.scroller { overflow-x: auto; }
-				}*/
 			</style>
 
 			<div id="container" part="container">

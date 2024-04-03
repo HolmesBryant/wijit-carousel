@@ -153,6 +153,7 @@ export class WijitCarousel extends HTMLElement {
 					--speed: ${this.speed}s;
 					--transition-timing: ease;
 					display: block;
+					width: 100%;
 				}
 
 				.hidden {
@@ -191,6 +192,7 @@ export class WijitCarousel extends HTMLElement {
 					box-sizing: border-box;
 					flex: 1 0;
 					height: var(--panel-height);
+					margin: 0 auto;
 					opacity: 1;
 					overflow: hidden;
 					position: relative;
@@ -198,9 +200,10 @@ export class WijitCarousel extends HTMLElement {
 					transition: all var(--speed);
 					transition-timing-function: var(--transition-timing);
 					white-space: nowrap;
-					max-width: 97vw;
+					max-width: auto;
 					perspective: var(--perspective);
 					perspective-origin: var(--perspective-origin);
+					width: 100%;
 				}
 
 				#panel.fade-out {

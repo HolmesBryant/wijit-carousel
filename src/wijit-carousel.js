@@ -613,4 +613,8 @@ export class WijitCarousel extends HTMLElement {
 
 }
 
-document.addEventListener('DOMContentLoaded', customElements.define('wijit-carousel', WijitCarousel));
+document.addEventListener('DOMContentLoaded', () => {
+	if (!customElements.get('wijit-carousel')) {
+		customElements.define('wijit-carousel', WijitCarousel);
+	}
+});

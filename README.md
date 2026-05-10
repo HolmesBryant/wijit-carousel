@@ -1,8 +1,8 @@
+# Archived: This project is archived and is no longer maintained.
+
 # Carousel Web Component
 
 Creates a carousel with a variety of effects.
-
-Demo: [https://holmesbryant.github.io/wijit-carousel/](https://holmesbryant.github.io/wijit-carousel/)
 
 ## Changelog
 
